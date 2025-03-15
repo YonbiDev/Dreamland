@@ -1,16 +1,19 @@
 import * as BABYLON from 'babylonjs';
+import "babylonjs-loaders";
 
 const canvas = document.getElementById("renderCanvas") as HTMLCanvasElement;
 const engine = new BABYLON.Engine(canvas, true);
 const scene = new BABYLON.Scene(engine);
+loadFBXModel(scene);
 
 // Camera (Age of Empires style)
 function createAgeOfEmpiresCamera(scene, canvas) {
-    const camera = new BABYLON.FreeCamera("AgeOfEmpiresCamera", new BABYLON.Vector3(0, 100, 0), scene);
-    camera.setTarget(new BABYLON.Vector3(0, 0, 0));
+    const camera = new BABYLON.FreeCamera("AgeOfEmpiresCamera", new BABYLON.Vector3(0, 100, 50), scene);
+    camera.setTarget(new BABYLON.Vector3(50 , 50, 50));
 
     let moveSpeed = 2;
     let zoomSpeed = 1;
+    
 
     scene.onBeforeRenderObservable.add(() => {
         let effectiveMoveSpeed = moveSpeed * camera.position.y / 50;
@@ -18,7 +21,7 @@ function createAgeOfEmpiresCamera(scene, canvas) {
 
         if (camera.position.y < 10) { camera.position.y = 10; }
         if (camera.position.y > 100) { camera.position.y = 100; }
-        camera.setTarget(new BABYLON.Vector3(camera.position.x, 0, camera.position.z));
+        camera.setTarget(new BABYLON.Vector3(camera.position.x +200, 0, camera.position.z));
     });
 
     const edgeScrollSpeed = 0.1;
@@ -28,6 +31,7 @@ function createAgeOfEmpiresCamera(scene, canvas) {
         if (scene.pointerY < canvas.height * 0.1) { camera.position.z += edgeScrollSpeed * camera.position.y / 50; }
         else if (scene.pointerY > canvas.height * 0.9) { camera.position.z -= edgeScrollSpeed * camera.position.y / 50; }
     });
+
 
     return camera;
 }
@@ -82,7 +86,14 @@ function createGrid(scene, cellSize, numCellsX, numCellsZ) {
     gridMaterial.diffuseTexture = gridTexture;
     gridMaterial.diffuseTexture.hasAlpha = true;
 
+    const largeGroundMat = new BABYLON.StandardMaterial("largeGroundMat");
+    largeGroundMat.diffuseTexture = new BABYLON.Texture("https://assets.babylonjs.com/environments/valleygrass.png");
+    const largeGround = BABYLON.MeshBuilder.CreateGround("longGround",{width:500,height:500});
+    largeGround.material = largeGroundMat;
+    largeGround.position.y = -0.01;
+
     grid.material = gridMaterial;
+  
     return grid;
 }
 
@@ -153,11 +164,24 @@ scene.onPointerDown = function(evt, pickResult) {
 
 };
 
+function loadFBXModel(scene: BABYLON.Scene) {
+  // Example using Babylon.js
+BABYLON.SceneLoader.ImportMeshAsync("", "", "Axe_01.glb", scene)
+.then((result) => {
+    // Model loaded successfully
+    const meshes = result.meshes;
+    // ... do something with the meshes ...
+    
+})
+.catch((error) => {
+    console.error("Error loading model:", error);
+});
 
+}
 
 
 //Light
-const light = new BABYLON.HemisphericLight("light", new BABYLON.Vector3(0, 1, 0), scene);
+const light = new BABYLON.HemisphericLight("light", new BABYLON.Vector3(2, 10, 10), scene);
 
 // Rendering loop
 engine.runRenderLoop(() => {

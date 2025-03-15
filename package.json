@@ -10,8 +10,6 @@
   "license": "ISC",
   "description": "",
   "devDependencies": {
-    "@babylonjs/core": "^7.51.3",
-    "@babylonjs/inspector": "^7.51.3",
     "html-webpack-plugin": "^5.6.3",
     "ts-loader": "^9.5.2",
     "typescript": "^5.8.2",
@@ -20,6 +18,7 @@
     "webpack-dev-server": "^5.2.0"
   },
   "dependencies": {
-    "babylonjs": "^7.53.2"
+    "babylonjs": "^7.53.3",
+    "babylonjs-loaders": "^7.53.3"
   }
 }
