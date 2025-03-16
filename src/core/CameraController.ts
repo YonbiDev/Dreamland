@@ -3,7 +3,7 @@ import * as BABYLON from 'babylonjs';
 
 export class CameraController {
     constructor(scene: BABYLON.Scene, canvas: HTMLCanvasElement) {
-        const camera = new BABYLON.FreeCamera("AgeOfEmpiresCamera", new BABYLON.Vector3(0, 100, 50), scene);
+     /*   const camera = new BABYLON.FreeCamera("AgeOfEmpiresCamera", new BABYLON.Vector3(0, 100, 50), scene);
         camera.setTarget(new BABYLON.Vector3(50, 50, 50));
 
         let moveSpeed = 2;
@@ -22,6 +22,9 @@ export class CameraController {
             else if (scene.pointerY > canvas.height * 0.9) camera.position.z -= edgeScrollSpeed * camera.position.y / 50;
         });
 
-        scene.activeCamera = camera;
+        scene.activeCamera = camera;*/
+
+        const camera = new BABYLON.ArcRotateCamera("Camera", 3 * Math.PI / 2,0, 70, BABYLON.Vector3.Zero());
+        camera.attachControl(canvas, true);
     }
 }

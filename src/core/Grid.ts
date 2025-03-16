@@ -1,13 +1,14 @@
 import * as BABYLON from 'babylonjs';
 export class Grid {
     private gridMesh: BABYLON.Mesh;
+    private largeGround: BABYLON.Mesh;
 
     constructor(scene: BABYLON.Scene, cellSize: number, numCellsX: number, numCellsZ: number) {
         const gridSizeX = cellSize * numCellsX;
         const gridSizeZ = cellSize * numCellsZ;
         
         // Création de la grille (1 seul mesh)
-        this.gridMesh = BABYLON.MeshBuilder.CreateGround("grid", { width: gridSizeX, height: gridSizeZ }, scene);
+      /*  this.gridMesh = BABYLON.MeshBuilder.CreateGround("grid", { width: gridSizeX, height: gridSizeZ }, scene);
         this.gridMesh.position.set(gridSizeX / 2 - cellSize / 2, 0, gridSizeZ / 2 - cellSize / 2);
         this.gridMesh.isPickable = true;
         
@@ -37,20 +38,22 @@ export class Grid {
         gridMaterial.diffuseTexture = gridTexture;
         gridMaterial.diffuseTexture.hasAlpha = true;
         this.gridMesh.material = gridMaterial;
-        
+        */
         // Ajout du sol sous la grille
         const largeGroundMat = new BABYLON.StandardMaterial("largeGroundMat");
         largeGroundMat.diffuseTexture = new BABYLON.Texture("https://assets.babylonjs.com/environments/valleygrass.png");
         
-        const largeGround = BABYLON.MeshBuilder.CreateGround("longGround", { width: 500, height: 500 });
-        largeGround.material = largeGroundMat;
-        largeGround.position.y = -0.01;
+        this.largeGround = BABYLON.MeshBuilder.CreateGround("longGround",  { width: gridSizeX, height: gridSizeZ });
+        
+        this.largeGround.isPickable = true;
+        this.largeGround.material = largeGroundMat;
+        this.largeGround.position.y = -0.01;
         
        
 
     }
 
     getMesh(): BABYLON.Mesh {
-        return this.gridMesh;
+        return this.largeGround;
     }
 }

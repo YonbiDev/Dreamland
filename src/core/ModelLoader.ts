@@ -1,9 +1,13 @@
 import * as BABYLON from 'babylonjs';
 
 export class ModelLoader {
-    constructor(scene: BABYLON.Scene) {
-        BABYLON.SceneLoader.ImportMeshAsync("", "", "Axe_01.glb", scene)
-            .then(result => console.log("Model loaded", result.meshes))
-            .catch(error => console.error("Error loading model:", error));
+    constructor(scene: BABYLON.Scene,nameOfObject: String) {
+        BABYLON.SceneLoader.ImportMeshAsync("", "", `${nameOfObject}.glb`, scene).then((result) => {
+            result.meshes.forEach(mesh => {
+                console.log(mesh.name); // Afficher les noms des objets
+                mesh.checkCollisions = true; // Activer les collisions
+            });
+        });
+        
     }
 }
