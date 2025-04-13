@@ -1,4 +1,3 @@
-import * as BABYLON from 'babylonjs';
 
 export class ModelLoader {
     constructor(scene: BABYLON.Scene,nameOfObject: String) {
