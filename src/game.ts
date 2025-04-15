@@ -3,6 +3,7 @@ import { CameraController } from "./core/CameraController";
 import { ModelLoader } from "./core/ModelLoader";
 import { Turret } from "./core/Turret";
 import { Enemy } from "./core/Enemy";
+import { UIManager } from "./core/UIManager";
 
 let enemies: Enemy[] = [];
 
@@ -10,7 +11,7 @@ export class Game {
     private engine: BABYLON.Engine;
     private scene: BABYLON.Scene;
     private canvas: HTMLCanvasElement;
-    
+    private uiManager: UIManager;
 
     constructor() {
         this.canvas = document.getElementById("renderCanvas") as HTMLCanvasElement;
@@ -55,11 +56,19 @@ export class Game {
 
         // ajoute d'un enemy et turret 
 
-        let turret = new Turret(this.scene,new BABYLON.Vector3(8,4,0),100);
+        //let turret = new Turret(this.scene,new BABYLON.Vector3(8,4,0),100);
         // Lancement de la boucle de rendu
-    
-            enemies.push(new Enemy(this.scene, new BABYLON.Vector3(30, 1, 5)));
-            enemies.push(new Enemy(this.scene, new BABYLON.Vector3(20, 1, -5)));
+        const waypoints = [
+            new BABYLON.Vector3(10, 0, 10),
+            new BABYLON.Vector3(20, 0, 20),
+            new BABYLON.Vector3(30, 0, 10)
+        ];
+        
+            enemies.push(new Enemy(this.scene, new BABYLON.Vector3(30, 1, 5),10, waypoints));
+            enemies.push(new Enemy(this.scene, new BABYLON.Vector3(20, 1, -5), 10, waypoints));
+
+        // Initialisation de l'UI
+        this.uiManager = new UIManager(this.scene, this.canvas);
 
         this.engine.runRenderLoop(() => {
             this.scene.render();
