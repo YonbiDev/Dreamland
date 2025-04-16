@@ -7,6 +7,8 @@ export class UIManager {
     private previewMesh: BABYLON.Mesh | null = null;
     private rangeIndicator: BABYLON.Mesh | null = null;
     private objectManager: ObjectManager;
+    private waypoints: BABYLON.Vector3[] = [];
+    private isPlacingWaypoints: boolean = false;
 
     constructor(scene: BABYLON.Scene, canvas: HTMLCanvasElement) {
         this.scene = scene;
@@ -47,6 +49,36 @@ export class UIManager {
         turretButton.style.cursor = "pointer";
         turretButton.onclick = () => this.startPlacingObject("turret");
         document.body.appendChild(turretButton);
+
+        // Button for placing waypoints
+        const waypointButton = document.createElement("div");
+        waypointButton.innerText = "Place Waypoints";
+        waypointButton.style.position = "absolute";
+        waypointButton.style.bottom = "100px";
+        waypointButton.style.left = "50%";
+        waypointButton.style.transform = "translateX(-50%)";
+        waypointButton.style.padding = "10px 20px";
+        waypointButton.style.backgroundColor = "#333";
+        waypointButton.style.color = "#fff";
+        waypointButton.style.borderRadius = "5px";
+        waypointButton.style.cursor = "pointer";
+        waypointButton.onclick = () => this.toggleWaypointPlacement();
+        document.body.appendChild(waypointButton);
+
+        // Button for saving waypoints
+        const saveButton = document.createElement("div");
+        saveButton.innerText = "Save Waypoints";
+        saveButton.style.position = "absolute";
+        saveButton.style.bottom = "140px";
+        saveButton.style.left = "50%";
+        saveButton.style.transform = "translateX(-50%)";
+        saveButton.style.padding = "10px 20px";
+        saveButton.style.backgroundColor = "#333";
+        saveButton.style.color = "#fff";
+        saveButton.style.borderRadius = "5px";
+        saveButton.style.cursor = "pointer";
+        saveButton.onclick = () => this.saveWaypoints();
+        document.body.appendChild(saveButton);
     }
 
     private startPlacingObject(objectType: string): void {
@@ -99,6 +131,11 @@ export class UIManager {
         }, 10);
     }
 
+    private toggleWaypointPlacement(): void {
+        this.isPlacingWaypoints = !this.isPlacingWaypoints;
+        console.log(`Waypoint placement mode: ${this.isPlacingWaypoints}`);
+    }
+
     private setupMouseEvents(): void {
         this.scene.onPointerDown = (evt, pickResult) => {
             if (this.isPlacingObject && evt.button === 0 && pickResult.hit && this.previewMesh) {
@@ -124,6 +161,51 @@ export class UIManager {
                     this.isPlacingObject = false;
                 }
             }
+
+            // Handle waypoint placement
+            if (this.isPlacingWaypoints && evt.button === 0 && pickResult.hit && pickResult.pickedMesh?.name === "Ground") {
+                const waypoint = pickResult.pickedPoint.clone();
+                this.waypoints.push(waypoint);
+
+                // Visualize the waypoint
+                const sphere = BABYLON.MeshBuilder.CreateSphere("waypoint", { diameter: 1 }, this.scene);
+                sphere.position = waypoint;
+                sphere.material = new BABYLON.StandardMaterial("waypointMat", this.scene);
+                (sphere.material as BABYLON.StandardMaterial).diffuseColor = BABYLON.Color3.Red();
+
+                console.log("Waypoint added:", waypoint);
+            }
         };
+    }
+
+    private saveWaypoints(): void {
+        const waypointData = JSON.stringify(this.waypoints.map(wp => ({ x: wp.x, y: wp.y, z: wp.z })));
+        console.log("Waypoints saved:", waypointData);
+
+        // Optionally save to localStorage
+        localStorage.setItem("waypoints", waypointData);
+    }
+
+    public loadWaypoints(): void {
+        const waypointData = localStorage.getItem("waypoints");
+        if (waypointData) {
+            this.waypoints = JSON.parse(waypointData).map((wp: { x: number; y: number; z: number }) =>
+                new BABYLON.Vector3(wp.x, wp.y, wp.z)
+            );
+
+            // Visualize loaded waypoints
+            this.waypoints.forEach(waypoint => {
+                const sphere = BABYLON.MeshBuilder.CreateSphere("waypoint", { diameter: 1 }, this.scene);
+                sphere.position = waypoint;
+                sphere.material = new BABYLON.StandardMaterial("waypointMat", this.scene);
+                (sphere.material as BABYLON.StandardMaterial).diffuseColor = BABYLON.Color3.Red();
+            });
+
+            console.log("Waypoints loaded:", this.waypoints);
+        }
+    }
+
+    public getWaypoints(): BABYLON.Vector3[] {
+        return this.waypoints;
     }
 }

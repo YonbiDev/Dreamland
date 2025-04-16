@@ -4,6 +4,7 @@ import { ModelLoader } from "./core/ModelLoader";
 import { Turret } from "./core/Turret";
 import { Enemy } from "./core/Enemy";
 import { UIManager } from "./core/UIManager";
+import { WaypointEditor } from "./core/WaypointEditor";
 
 let enemies: Enemy[] = [];
 
@@ -54,26 +55,26 @@ export class Game {
         skybox.material = skyboxMaterial;
        
 
-        // ajoute d'un enemy et turret 
+        // Enable the waypoint editor in development mode
+        if (process.env.NODE_ENV === "development") {
+            new WaypointEditor(this.scene);
+        }
 
-        //let turret = new Turret(this.scene,new BABYLON.Vector3(8,4,0),100);
-        // Lancement de la boucle de rendu
-        const waypoints = [
-            new BABYLON.Vector3(10, 0, 10),
-            new BABYLON.Vector3(20, 0, 20),
-            new BABYLON.Vector3(30, 0, 10)
-        ];
-        
-            enemies.push(new Enemy(this.scene, new BABYLON.Vector3(30, 1, 5),10, waypoints));
-            enemies.push(new Enemy(this.scene, new BABYLON.Vector3(20, 1, -5), 10, waypoints));
+        // Define the current level
+        const currentLevel = "level1";
 
-        // Initialisation de l'UI
-        this.uiManager = new UIManager(this.scene, this.canvas);
+        // Load spawn positions for the current level
+        const waypointEditor = new WaypointEditor(this.scene);
+        const spawnPositions = waypointEditor.loadSpawnPositions(`${currentLevel}_spawn1`);
+
+        // Add enemies at the loaded spawn positions
+        spawnPositions.forEach(spawnPosition => {
+            enemies.push(new Enemy(this.scene, spawnPosition, 10, currentLevel, `${currentLevel}_spawn1`));
+        });
 
         this.engine.runRenderLoop(() => {
             this.scene.render();
         });
-       
     }
     
 }

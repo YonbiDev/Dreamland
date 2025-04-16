@@ -8,16 +8,16 @@ export class Enemy {
     waypoints: BABYLON.Vector3[];
     currentWaypointIndex: number = 0;
 
-    constructor(scene: BABYLON.Scene, position: BABYLON.Vector3, health: number = 10, waypoints: BABYLON.Vector3[] = []) {
+    constructor(scene: BABYLON.Scene, position: BABYLON.Vector3, health: number = 10, level: string, spawnLabel: string) {
         this.scene = scene;
         this.health = health;
-        this.waypoints = waypoints;
+
+        // Load waypoints for the given level and spawn label
+        this.waypoints = this.loadRandomWaypoints(level, spawnLabel);
 
         // Créer un cube ennemi
         this.mesh = BABYLON.MeshBuilder.CreateBox("enemy", { size: 3 }, scene);
         this.mesh.position = position;
-
-      
 
         // Enable physics for the enemy mesh
         this.mesh.physicsImpostor = new BABYLON.PhysicsImpostor(
@@ -37,6 +37,21 @@ export class Enemy {
         if (this.waypoints.length > 0) {
             this.moveToNextWaypoint();
         }
+    }
+
+    private loadRandomWaypoints(level: string, spawnLabel: string): BABYLON.Vector3[] {
+        const filename = `${level}_${spawnLabel}_waypoints.json`;
+        const waypointData = localStorage.getItem(filename);
+        if (waypointData) {
+            const waypoints = JSON.parse(waypointData).map((wp: { x: number; y: number; z: number }) =>
+                new BABYLON.Vector3(wp.x, wp.y, wp.z)
+            );
+            console.log(`Waypoints loaded for spawn ${spawnLabel}:`, waypoints);
+            return waypoints;
+        }
+
+        console.warn(`No waypoints found for spawn ${spawnLabel} in level ${level}`);
+        return [];
     }
 
     private moveToNextWaypoint(): void {
