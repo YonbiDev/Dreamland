@@ -6,8 +6,10 @@ import { Enemy } from "./core/Enemy";
 import { UIManager } from "./core/UIManager";
 import { WaypointEditor } from "./core/WaypointEditor";
 import { WaypointManager } from "./core/WaypointManager";
+import { WaveManager } from "./core/WaveManager";
+import { enemies } from "./core/GlobalState";
 
-let enemies: Enemy[] = [];
+let waveManager: WaveManager;
 
 export class Game {
     private engine: BABYLON.Engine;
@@ -21,76 +23,64 @@ export class Game {
         this.scene = initializeScene(this.engine);
 
         this.init();
-        
     }
 
     private init(): void {
-
-        //bugs 
-        // quand je fais clear ca supprime pas les waypoints dans la map 
-
-
-
-
         // Ajout de la caméra
         new CameraController(this.scene, this.canvas);
 
         // Ajout de la grille
-       // const grid = new Grid(this.scene, 10, 30, 30);
+        // const grid = new Grid(this.scene, 10, 30, 30);
 
-      //  const ground = new Ground(this.scene);
+        // const ground = new Ground(this.scene);
 
         // Gestion des boîtes
-       // new BoxManager(this.scene, grid.getMesh());
+        // new BoxManager(this.scene, grid.getMesh());
 
         new UIManager(this.scene, this.canvas);
         // Chargement des modèles
-        new ModelLoader(this.scene,"LandMass");
+        new ModelLoader(this.scene, "LandMass");
 
         // Ajout d'une lumière
         new BABYLON.HemisphericLight("light", new BABYLON.Vector3(2, 10, 10), this.scene);
 
-
         // ajout d'un sky
         const skybox = BABYLON.MeshBuilder.CreateBox("skyBox", { size: 1000.0 }, this.scene);
         skybox.infiniteDistance = true;
-        
+
         const skyboxMaterial = new BABYLON.StandardMaterial("skyBoxMaterial", this.scene);
         skyboxMaterial.backFaceCulling = false;
         skyboxMaterial.disableLighting = true;
         skyboxMaterial.reflectionTexture = new BABYLON.CubeTexture("textures/skybox", this.scene);
         skyboxMaterial.reflectionTexture.coordinatesMode = BABYLON.Texture.SKYBOX_MODE;
-        
+
         skybox.material = skyboxMaterial;
-       
 
         // Enable the waypoint editor in development mode
         if (process.env.NODE_ENV === "development") {
-          //   const waypointEditor = new WaypointEditor(this.scene);
-           
-               // Add enemies at the loaded spawn positions
-      
-
-
+            // const waypointEditor = new WaypointEditor(this.scene);
         }
-        const spawnPositions = WaypointManager.loadSpawnPositions(1, 1, "level1_spawnpoint1"); // Assuming level 1 and spawn position 1
-        spawnPositions.forEach(spawnPosition => {
-            enemies.push(new Enemy(this.scene, spawnPosition, 10, '1', '1'));
-        });
-        // Define the current level
-        const currentLevel = "1";
 
-        // Load spawn positions for the current level
-       
+        // Initialize the WaveManager
+        waveManager = new WaveManager(this.scene, WaypointManager);
 
-      
+        // Start the first wave
+        waveManager.startWave(1, "level1_spawnpoint1", 2); // 5 enemies for wave 1
+
         this.engine.runRenderLoop(() => {
             const deltaTime = this.engine.getDeltaTime() / 1000; // Convertir en secondes
+
+            // Update enemies
             enemies.forEach(enemy => enemy.update(deltaTime));
+
+            // Check if the wave is complete and start the next wave
+            if (waveManager.isWaveComplete()) {
+                console.log("Wave complete!");
+            }
+
             this.scene.render();
         });
     }
-    
 }
 
 export function initializeScene(engine: BABYLON.Engine): BABYLON.Scene {
@@ -112,14 +102,5 @@ export function deleteEnemey(enemy: Enemy): void {
     }
 }
 
-export function createEnemiesForLevel1(scene: BABYLON.Scene): void {
-    const level = 1;
-    const spawnPositionNumber = 1; // Assuming spawn position 1 for level 1
 
-    for (let i = 0; i < 5; i++) { // Create 5 enemies
-        const enemy = Enemy.createRandomEnemy(scene, level, spawnPositionNumber);
-        if (enemy) {
-            console.log("Enemy created at:", enemy.mesh.position);
-        }
-    }
-}
+

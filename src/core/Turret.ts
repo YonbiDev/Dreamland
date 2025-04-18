@@ -1,4 +1,4 @@
-import { getEnemies } from "../game";
+import { enemies } from "./GlobalState";
 import { Projectile } from "./Projectile";
 
 export class Turret {
@@ -25,19 +25,21 @@ export class Turret {
     }
 
     findTarget() {
-        let enemies = getEnemies(); // Récupérer la liste des ennemis à jour
         this.target = null;
         let closestDist = this.range;
 
         enemies.forEach(enemy => {
-            const distance = BABYLON.Vector3.Distance(this.mesh.position, enemy.mesh.position);
-            if (distance < closestDist) {
-                closestDist = distance;
-                this.target = enemy.mesh;
+            if (!enemy.mesh || !enemy.mesh.isDisposed()) { // Ensure the enemy is valid
+                const distance = BABYLON.Vector3.Distance(this.mesh.position, enemy.mesh.position);
+                if (distance < closestDist) {
+                    closestDist = distance;
+                    this.target = enemy.mesh;
+                }
             }
         });
 
         if (this.target) {
+            console.log(`Turret targeting enemy at ${this.target.position}`);
             this.shoot();
         }
     }

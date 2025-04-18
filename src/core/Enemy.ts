@@ -8,6 +8,8 @@ export class Enemy {
     waypoints: BABYLON.Vector3[];
     currentWaypointIndex: number = 0;
     speed: number = 0.1; // Movement speed
+    private movementVariation: number = 0.02; // Variation factor for natural movement
+    private randomSpeedOffset: number;
 
     constructor(scene: BABYLON.Scene, position: BABYLON.Vector3, health: number = 10, level: string, spawnLabel: string) {
         this.scene = scene;
@@ -31,6 +33,8 @@ export class Enemy {
 
         this.mesh.metadata = this.mesh.metadata || {};
         this.mesh.metadata.enemyInstance = this;
+
+        this.randomSpeedOffset = Math.random() * 0.05 - 0.025; // Random speed offset between -0.025 and 0.025
     }
 
     private static getRandomSpawnPoint(level: number, spawnPositionNumber: number): BABYLON.Vector3 | null {
@@ -81,7 +85,6 @@ export class Enemy {
     }
 
     static createRandomEnemy(scene: BABYLON.Scene, level: number, spawnPositionNumber: number): Enemy | null {
-    
         const spawnPoint = this.getRandomSpawnPoint(level, spawnPositionNumber);
         if (!spawnPoint) {
             console.warn("Failed to create enemy: No spawn point available.");
@@ -106,12 +109,12 @@ export class Enemy {
         while (true) {
             const filename = `${key}_waypoint${index}.json`;
             const waypointData = localStorage.getItem(filename);
-            if (!waypointData  ) break;
+            if (!waypointData) break;
 
             const waypoints = JSON.parse(waypointData).map((wp: { x: number; y: number; z: number }) =>
                 new BABYLON.Vector3(wp.x, wp.y, wp.z)
             );
-            if(waypoints.length === 0) {
+            if (waypoints.length === 0) {
                 break;
             }
             waypointLists.push(waypoints);
@@ -125,27 +128,42 @@ export class Enemy {
 
         const randomListIndex = Math.floor(Math.random() * waypointLists.length);
         console.log(`Loaded waypoints for ${key}:`, waypointLists[randomListIndex]);
-        return waypointLists[randomListIndex];
+
+        // Return a copy of the selected waypoint list
+        return waypointLists[randomListIndex].map(wp => wp.clone());
     }
 
     private moveToNextWaypoint(): void {
-        if (this.currentWaypointIndex >= this.waypoints.length) return;
+        if (this.currentWaypointIndex >= this.waypoints.length) {
+            console.log("Enemy reached the final waypoint.");
+            return; // Stop moving if no more waypoints
+        }
 
         const target = this.waypoints[this.currentWaypointIndex];
-        const speed = 0.1; // Movement speed
         const moveInterval = setInterval(() => {
             const direction = target.subtract(this.mesh.position).normalize();
             const distance = BABYLON.Vector3.Distance(this.mesh.position, target);
 
+            // Add slight random variation to direction
+            const variation = new BABYLON.Vector3(
+                (Math.random() - 0.5) * this.movementVariation,
+                (Math.random() - 0.5) * this.movementVariation,
+                (Math.random() - 0.5) * this.movementVariation
+            );
+            const adjustedDirection = direction.add(variation).normalize();
+
+            // Adjust speed with random offset
+            const adjustedSpeed = this.speed + this.randomSpeedOffset;
+
             // Attempt to move while respecting collisions
-            const moveVector = direction.scale(speed);
+            const moveVector = adjustedDirection.scale(adjustedSpeed);
             this.mesh.moveWithCollisions(moveVector);
 
-            if (distance < 0.5) {
+            if (distance < 0.5) { // Adjust threshold for reaching the waypoint
                 // Reached the waypoint
                 clearInterval(moveInterval);
                 this.currentWaypointIndex++;
-                this.moveToNextWaypoint();
+                this.moveToNextWaypoint(); // Move to the next waypoint
             }
         }, 16); // Update every 16ms (~60 FPS)
     }
@@ -164,8 +182,19 @@ export class Enemy {
             const direction = target.subtract(this.mesh.position).normalize();
             const distance = BABYLON.Vector3.Distance(this.mesh.position, target);
 
+            // Add slight random variation to direction
+            const variation = new BABYLON.Vector3(
+                (Math.random() - 0.5) * this.movementVariation,
+                (Math.random() - 0.5) * this.movementVariation,
+                (Math.random() - 0.5) * this.movementVariation
+            );
+            const adjustedDirection = direction.add(variation).normalize();
+
+            // Adjust speed with random offset
+            const adjustedSpeed = this.speed + this.randomSpeedOffset;
+
             if (distance > 0.1) {
-                this.mesh.position.addInPlace(direction.scale(this.speed * deltaTime));
+                this.mesh.position.addInPlace(adjustedDirection.scale(adjustedSpeed * deltaTime));
             } else {
                 console.log(`Reached waypoint: ${target.toString()}`);
                 this.waypoints.shift();
