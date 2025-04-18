@@ -104,6 +104,7 @@ export class UIManager {
 
             if (isGround && isPositionFree && this.previewMesh) {
                 const objectType = this.previewMesh.name.replace("preview_", "");
+                snappedPosition.y += 1; // Adjust the Y position to place the object above the ground
                 this.objectManager.createObject(objectType, snappedPosition);
 
                 // Dispose of the preview mesh and range indicator, and reset placement state

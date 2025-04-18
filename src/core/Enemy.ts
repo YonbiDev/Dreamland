@@ -28,6 +28,9 @@ export class Enemy {
         if (this.waypoints.length > 0) {
             this.moveToNextWaypoint();
         }
+
+        this.mesh.metadata = this.mesh.metadata || {};
+        this.mesh.metadata.enemyInstance = this;
     }
 
     private static getRandomSpawnPoint(level: number, spawnPositionNumber: number): BABYLON.Vector3 | null {
