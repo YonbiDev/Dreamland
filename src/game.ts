@@ -5,6 +5,7 @@ import { Turret } from "./core/Turret";
 import { Enemy } from "./core/Enemy";
 import { UIManager } from "./core/UIManager";
 import { WaypointEditor } from "./core/WaypointEditor";
+import { WaypointManager } from "./core/WaypointManager";
 
 let enemies: Enemy[] = [];
 
@@ -17,13 +18,20 @@ export class Game {
     constructor() {
         this.canvas = document.getElementById("renderCanvas") as HTMLCanvasElement;
         this.engine = new BABYLON.Engine(this.canvas, true);
-        this.scene = new BABYLON.Scene(this.engine);
+        this.scene = initializeScene(this.engine);
 
         this.init();
         
     }
 
     private init(): void {
+
+        //bugs 
+        // quand je fais clear ca supprime pas les waypoints dans la map 
+
+
+
+
         // Ajout de la caméra
         new CameraController(this.scene, this.canvas);
 
@@ -35,6 +43,7 @@ export class Game {
         // Gestion des boîtes
        // new BoxManager(this.scene, grid.getMesh());
 
+        new UIManager(this.scene, this.canvas);
         // Chargement des modèles
         new ModelLoader(this.scene,"LandMass");
 
@@ -57,27 +66,38 @@ export class Game {
 
         // Enable the waypoint editor in development mode
         if (process.env.NODE_ENV === "development") {
-            new WaypointEditor(this.scene);
-        }
+          //   const waypointEditor = new WaypointEditor(this.scene);
+           
+               // Add enemies at the loaded spawn positions
+      
 
+
+        }
+        const spawnPositions = WaypointManager.loadSpawnPositions(1, 1, "level1_spawnpoint1"); // Assuming level 1 and spawn position 1
+        spawnPositions.forEach(spawnPosition => {
+            enemies.push(new Enemy(this.scene, spawnPosition, 10, '1', '1'));
+        });
         // Define the current level
-        const currentLevel = "level1";
+        const currentLevel = "1";
 
         // Load spawn positions for the current level
-        const waypointEditor = new WaypointEditor(this.scene);
-        const spawnPositions = waypointEditor.loadSpawnPositions(`${currentLevel}_spawn1`);
+       
 
-        // Add enemies at the loaded spawn positions
-        spawnPositions.forEach(spawnPosition => {
-            enemies.push(new Enemy(this.scene, spawnPosition, 10, currentLevel, `${currentLevel}_spawn1`));
-        });
-
+      
         this.engine.runRenderLoop(() => {
+            const deltaTime = this.engine.getDeltaTime() / 1000; // Convertir en secondes
+            enemies.forEach(enemy => enemy.update(deltaTime));
             this.scene.render();
         });
     }
     
 }
+
+export function initializeScene(engine: BABYLON.Engine): BABYLON.Scene {
+    const scene = new BABYLON.Scene(engine);
+    return scene;
+}
+
 export function getEnemies(): Enemy[] {
     console.log("📌 Ennemis restants :", enemies.length);
     return enemies;
@@ -89,5 +109,17 @@ export function deleteEnemey(enemy: Enemy): void {
     if (index !== -1) {
         enemies.splice(index, 1);
         console.log("📌 Enemy removed. Remaining enemies:", enemies.length);
+    }
+}
+
+export function createEnemiesForLevel1(scene: BABYLON.Scene): void {
+    const level = 1;
+    const spawnPositionNumber = 1; // Assuming spawn position 1 for level 1
+
+    for (let i = 0; i < 5; i++) { // Create 5 enemies
+        const enemy = Enemy.createRandomEnemy(scene, level, spawnPositionNumber);
+        if (enemy) {
+            console.log("Enemy created at:", enemy.mesh.position);
+        }
     }
 }

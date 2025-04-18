@@ -1,3 +1,5 @@
+import { WaypointManager } from "./WaypointManager";
+
 export class WaypointEditor {
     private scene: BABYLON.Scene;
     private waypoints: BABYLON.Vector3[] = [];
@@ -6,6 +8,7 @@ export class WaypointEditor {
     private isPlacingSpawns: boolean = false;
     private level: number = 1; // Default level
     private spawnPositionNumber: number = 1; // Default spawn position number
+    private currentKey: string = `level${this.level}_spawnpoint${this.spawnPositionNumber}`; // Global key
     private spawnLabel: string = "default"; // Default spawn label
     private waypointsByLevelAndSpawn: Map<string, BABYLON.Vector3[][]> = new Map(); // Map "level_spawn" to lists of waypoints
     private spawnToWaypoints: Map<string, BABYLON.Vector3[]> = new Map(); // Map spawn label to waypoints
@@ -15,7 +18,17 @@ export class WaypointEditor {
         this.scene = scene;
         this.setupUI();
         this.setupMouseEvents();
-        this.displayExistingData();
+
+        // Load waypoints for the default level and spawn position
+        this.loadWaypoints(this.level, this.spawnPositionNumber);
+
+        // Populate the waypoint list selector with existing data
+        const waypointListSelector = document.querySelector<HTMLSelectElement>("select");
+        this.waypointsByLevelAndSpawn.get(this.currentKey);
+    }
+
+    private updateCurrentKey(): void {
+        this.currentKey = `level${this.level}_spawnpoint${this.spawnPositionNumber}`;
     }
 
     private setupUI(): void {
@@ -59,6 +72,7 @@ export class WaypointEditor {
         levelSelector.style.color = "#fff";
         levelSelector.onchange = (e) => {
             this.level = parseInt((e.target as HTMLSelectElement).value, 10);
+            this.updateCurrentKey();
             console.log(`Level selected: ${this.level}`);
         };
         for (let i = 1; i <= 10; i++) {
@@ -87,6 +101,7 @@ export class WaypointEditor {
         spawnSelector.style.color = "#fff";
         spawnSelector.onchange = (e) => {
             this.spawnPositionNumber = parseInt((e.target as HTMLSelectElement).value, 10);
+            this.updateCurrentKey();
             console.log(`Spawn position selected: ${this.spawnPositionNumber}`);
         };
         for (let i = 1; i <= 10; i++) {
@@ -113,10 +128,6 @@ export class WaypointEditor {
         waypointListSelector.style.borderRadius = "5px";
         waypointListSelector.style.backgroundColor = "#333";
         waypointListSelector.style.color = "#fff";
-        waypointListSelector.onchange = (e) => {
-            this.waypointListIndex = parseInt((e.target as HTMLSelectElement).value, 10);
-            console.log(`Waypoint list selected: ${this.waypointListIndex}`);
-        };
         this.updateWaypointListSelector(waypointListSelector);
         controlPanel.appendChild(waypointListSelector);
 
@@ -207,6 +218,54 @@ export class WaypointEditor {
         clearSpawnButton.onclick = () => this.clearSpawns();
         controlPanel.appendChild(clearSpawnButton);
 
+        // Bouton pour charger les waypoints
+        const loadWaypointsButton = document.createElement("button");
+        loadWaypointsButton.innerText = "Load Waypoints";
+        loadWaypointsButton.style.width = "100%";
+        loadWaypointsButton.style.padding = "10px";
+        loadWaypointsButton.style.marginBottom = "15px";
+        loadWaypointsButton.style.border = "none";
+        loadWaypointsButton.style.borderRadius = "5px";
+        loadWaypointsButton.style.backgroundColor = "#8BC34A"; // Vert clair pour charger
+        loadWaypointsButton.style.color = "#fff";
+        loadWaypointsButton.style.cursor = "pointer";
+        loadWaypointsButton.onclick = () => {
+            this.updateWaypointListSelector(waypointListSelector);
+            this.loadWaypoints(this.level, this.spawnPositionNumber);
+        };
+        controlPanel.appendChild(loadWaypointsButton);
+
+        // Bouton pour charger les spawns
+        const loadSpawnsButton = document.createElement("button");
+        loadSpawnsButton.innerText = "Load Spawns";
+        loadSpawnsButton.style.width = "100%";
+        loadSpawnsButton.style.padding = "10px";
+        loadSpawnsButton.style.marginBottom = "15px";
+        loadSpawnsButton.style.border = "none";
+        loadSpawnsButton.style.borderRadius = "5px";
+        loadSpawnsButton.style.backgroundColor = "#8BC34A"; // Vert clair pour charger
+        loadSpawnsButton.style.color = "#fff";
+        loadSpawnsButton.style.cursor = "pointer";
+        loadSpawnsButton.onclick = () => {
+            this.loadSpawnPositions(this.level, this.spawnPositionNumber);
+            this.updateWaypointListSelector(waypointListSelector);
+        };
+        controlPanel.appendChild(loadSpawnsButton);
+
+        // Bouton pour effacer les waypoints
+        const clearWaypointsButton = document.createElement("button");
+        clearWaypointsButton.innerText = "Clear Waypoints";
+        clearWaypointsButton.style.width = "100%";
+        clearWaypointsButton.style.padding = "10px";
+        clearWaypointsButton.style.marginBottom = "15px";
+        clearWaypointsButton.style.border = "none";
+        clearWaypointsButton.style.borderRadius = "5px";
+        clearWaypointsButton.style.backgroundColor = "#F44336"; // Rouge foncé pour effacer
+        clearWaypointsButton.style.color = "#fff";
+        clearWaypointsButton.style.cursor = "pointer";
+        clearWaypointsButton.onclick = () => this.clearCurrentWaypointList();
+        controlPanel.appendChild(clearWaypointsButton);
+
         // Conteneur pour afficher les données existantes
         const dataContainer = document.createElement("div");
         dataContainer.id = "dataContainer";
@@ -225,22 +284,47 @@ export class WaypointEditor {
     }
 
     private updateWaypointListSelector(selector: HTMLSelectElement): void {
-        const key = `${this.level}_spawn_${this.spawnPositionNumber}`;
-        const waypointLists = this.waypointsByLevelAndSpawn.get(key) || [];
+        const waypointLists = this.waypointsByLevelAndSpawn.get(this.currentKey) || [];
         selector.innerHTML = ""; // Clear existing options
 
-        waypointLists.forEach((_, index) => {
+        waypointLists.forEach((list, index) => {
             const option = document.createElement("option");
             option.value = index.toString();
-            option.innerText = `List ${index + 1}`;
+            option.innerText = `List ${index + 1} (${list.length} waypoints)`; // Display waypoint count
             selector.appendChild(option);
         });
 
-        // Automatically select the last list if a new one is added
+        // Automatically select the first list if it exists
         if (waypointLists.length > 0) {
-            selector.value = (waypointLists.length - 1).toString();
-            this.waypointListIndex = waypointLists.length - 1;
+            selector.value = "0";
+            this.waypointListIndex = 0;
+            this.displayWaypointsOfCurrentList(); // Display waypoints of the first list
         }
+
+        selector.onchange = () => {
+            this.waypointListIndex = parseInt(selector.value, 10);
+            this.displayWaypointsOfCurrentList(); // Display waypoints of the newly selected list
+        };
+    }
+
+    private displayWaypointsOfCurrentList(): void {
+        // Clear existing waypoint meshes
+        this.scene.meshes
+            .filter(mesh => mesh.name === "waypoint")
+            .forEach(mesh => mesh.dispose());
+
+        const waypointLists = this.waypointsByLevelAndSpawn.get(this.currentKey) || [];
+        const currentList = waypointLists[this.waypointListIndex] || [];
+
+        // Visualize waypoints of the current list
+        currentList.forEach(waypoint => {
+            const sphere = BABYLON.MeshBuilder.CreateSphere("waypoint", { diameter: 1 }, this.scene);
+            sphere.position = waypoint;
+            sphere.material = new BABYLON.StandardMaterial("waypointMat", this.scene);
+            (sphere.material as BABYLON.StandardMaterial).diffuseColor = BABYLON.Color3.Red();
+        });
+
+        console.log(`Displayed waypoints for list ${this.waypointListIndex + 1}:`, currentList);
     }
 
     private toggleWaypointPlacement(): void {
@@ -275,10 +359,10 @@ export class WaypointEditor {
                 this.spawnPositions.push(spawnPosition);
 
                 // Visualize the spawn position
-                const sphere = BABYLON.MeshBuilder.CreateSphere("spawn", { diameter: 1.5 }, this.scene);
+                const sphere = BABYLON.MeshBuilder.CreateSphere(`spawn_${this.spawnPositions.length - 1}`, { diameter: 1.5 }, this.scene); // Unique name
                 sphere.position = spawnPosition;
-                sphere.material = new BABYLON.StandardMaterial("spawnMat", this.scene);
-                (sphere.material as BABYLON.StandardMaterial).diffuseColor = BABYLON.Color3.Blue();
+                sphere.material = new BABYLON.StandardMaterial(`spawnMat_${this.spawnPositions.length - 1}`, this.scene); // Unique material name
+                (sphere.material as BABYLON.StandardMaterial).diffuseColor = BABYLON.Color3.Blue(); // Ensure blue color
 
                 this.displayExistingData();
                 console.log("Spawn position added:", spawnPosition);
@@ -286,128 +370,176 @@ export class WaypointEditor {
 
             if (this.isPlacingWaypoints && evt.button === 0 && pickResult.hit && pickResult.pickedMesh?.name === "Ground") {
                 const waypoint = pickResult.pickedPoint.clone();
-                const key = `${this.level}_spawn_${this.spawnPositionNumber}`;
-                if (!this.waypointsByLevelAndSpawn.has(key)) {
-                    this.waypointsByLevelAndSpawn.set(key, [[]]); // Initialize with an empty list of waypoint lists
+                if (!this.waypointsByLevelAndSpawn.has(this.currentKey)) {
+                    this.waypointsByLevelAndSpawn.set(this.currentKey, [[]]); // Initialize with an empty list of waypoint lists
                 }
-                const waypointLists = this.waypointsByLevelAndSpawn.get(key);
+                const waypointLists = this.waypointsByLevelAndSpawn.get(this.currentKey);
                 if (waypointLists) {
                     waypointLists[this.waypointListIndex].push(waypoint); // Add to the selected list
                 }
 
                 // Visualize the waypoint
-                const sphere = BABYLON.MeshBuilder.CreateSphere("waypoint", { diameter: 1 }, this.scene);
+                const sphere = BABYLON.MeshBuilder.CreateSphere(`waypoint_${this.currentKey}_${this.waypointListIndex}_${waypointLists![this.waypointListIndex].length - 1}`, { diameter: 1 }, this.scene); // Unique name
+                waypoint.y += 1; // Adjust height for visibility
                 sphere.position = waypoint;
-                sphere.material = new BABYLON.StandardMaterial("waypointMat", this.scene);
+                sphere.material = new BABYLON.StandardMaterial(`waypointMat_${this.currentKey}_${this.waypointListIndex}`, this.scene); // Unique material name
                 (sphere.material as BABYLON.StandardMaterial).diffuseColor = BABYLON.Color3.Red();
 
                 this.displayExistingData();
-                console.log(`Waypoint added to ${key}, list ${this.waypointListIndex + 1}:`, waypoint);
+                console.log(`Waypoint added to ${this.currentKey}, list ${this.waypointListIndex + 1}:`, waypoint);
             }
         };
     }
 
     public saveWaypoints(): void {
-        const key = `${this.level}_spawn_${this.spawnPositionNumber}`;
-        const filename = `${key}_waypoints.json`;
-        const waypointData = JSON.stringify(
-            this.waypointsByLevelAndSpawn.get(key)?.map(list => list.map(wp => ({ x: wp.x, y: wp.y, z: wp.z }))) || []
-        );
-        console.log(`Waypoints saved to ${filename}:`, waypointData);
+        const waypointLists = this.waypointsByLevelAndSpawn.get(this.currentKey) || [];
+        waypointLists.forEach((list, index) => {
+            const filename = `${this.currentKey}_waypoint${index + 1}.json`;
+            const waypointData = JSON.stringify(list.map(wp => ({ x: wp.x, y: wp.y, z: wp.z })));
+            localStorage.setItem(filename, waypointData);
+            console.log(`Waypoints saved to ${filename}:`, waypointData);
+        });
+        console.log(this.currentKey);
 
-        localStorage.setItem(filename, waypointData);
         this.displayExistingData();
     }
 
     public saveSpawnPositions(): void {
-        const filename = `${this.spawnLabel}_spawns.json`;
+        const filename = `level${this.level}_spawnpoint${this.spawnPositionNumber}.json`;
         const spawnData = JSON.stringify(this.spawnPositions.map(sp => ({ x: sp.x, y: sp.y, z: sp.z })));
-        console.log(`Spawn positions saved to ${filename}:`, spawnData);
-
         localStorage.setItem(filename, spawnData);
+        console.log(`Spawn positions saved to ${filename}:`, spawnData);
         this.displayExistingData();
     }
 
     public loadWaypoints(level: number, spawnPositionNumber: number): BABYLON.Vector3[][] {
-        const key = `${level}_spawn_${spawnPositionNumber}`;
-        const filename = `${key}_waypoints.json`;
-        const waypointData = localStorage.getItem(filename);
-        if (waypointData) {
-            const waypointLists = JSON.parse(waypointData).map((list: { x: number; y: number; z: number }[]) =>
-                list.map(wp => new BABYLON.Vector3(wp.x, wp.y, wp.z))
+        this.level = level;
+        this.spawnPositionNumber = spawnPositionNumber;
+        this.updateCurrentKey();
+
+        const waypointLists: BABYLON.Vector3[][] = [];
+        let index = 1;
+        while (true) {
+            const filename = `${this.currentKey}_waypoint${index}.json`;
+            const waypointData = localStorage.getItem(filename);
+            if (!waypointData) break;
+            const waypoints = JSON.parse(waypointData).map((wp: { x: number; y: number; z: number }) =>
+                new BABYLON.Vector3(wp.x, wp.y, wp.z)
             );
-            this.waypointsByLevelAndSpawn.set(key, waypointLists);
-
-            // Visualize loaded waypoints
-            waypointLists.forEach(list => {
-                list.forEach(waypoint => {
-                    const sphere = BABYLON.MeshBuilder.CreateSphere("waypoint", { diameter: 1 }, this.scene);
-                    sphere.position = waypoint;
-                    sphere.material = new BABYLON.StandardMaterial("waypointMat", this.scene);
-                    (sphere.material as BABYLON.StandardMaterial).diffuseColor = BABYLON.Color3.Red();
-                });
-            });
-
-            console.log(`Waypoints loaded for ${key}:`, waypointLists);
+            waypointLists.push(waypoints);
+            index++;
         }
-        this.displayExistingData();
-        return this.waypointsByLevelAndSpawn.get(key) || [];
+        this.waypointsByLevelAndSpawn.set(this.currentKey, waypointLists);
+        console.log(`Waypoints loaded for ${this.currentKey}:`, waypointLists);
+        this.displayExistingData(); //  pour le text
+        this.displayWaypointsOfCurrentList(); // Display loaded waypoints
+        return waypointLists;
     }
 
-    public loadSpawnPositions(label: string): BABYLON.Vector3[] {
-        const filename = `${label}_spawns.json`;
+    public loadSpawnPositions(level: number, spawnPositionNumber: number): BABYLON.Vector3[] {
+        const filename = `level${level}_spawnpoint${spawnPositionNumber}.json`;
         const spawnData = localStorage.getItem(filename);
         if (spawnData) {
             this.spawnPositions = JSON.parse(spawnData).map((sp: { x: number; y: number; z: number }) =>
                 new BABYLON.Vector3(sp.x, sp.y, sp.z)
             );
-
-            // Visualize loaded spawn positions
-            this.spawnPositions.forEach(spawn => {
-                const sphere = BABYLON.MeshBuilder.CreateSphere("spawn", { diameter: 1.5 }, this.scene);
-                sphere.position = spawn;
-                sphere.material = new BABYLON.StandardMaterial("spawnMat", this.scene);
-                (sphere.material as BABYLON.StandardMaterial).diffuseColor = BABYLON.Color3.Blue();
-            });
-
             console.log(`Spawn positions loaded from ${filename}:`, this.spawnPositions);
         }
+
+        // Clear and re-visualize spawn positions to ensure correct color and naming
+        this.visualizeSpawnPositions();
+
         this.displayExistingData();
         return this.spawnPositions;
     }
 
     public startNewWaypointList(): void {
-        const key = `${this.level}_spawn_${this.spawnPositionNumber}`;
-        if (!this.waypointsByLevelAndSpawn.has(key)) {
-            this.waypointsByLevelAndSpawn.set(key, []);
+        if (!this.waypointsByLevelAndSpawn.has(this.currentKey)) {
+            this.waypointsByLevelAndSpawn.set(this.currentKey, []);
         }
-        this.waypointsByLevelAndSpawn.get(key)?.push([]); // Start a new list of waypoints
-        console.log(`Started a new waypoint list for ${key}`);
+        this.waypointsByLevelAndSpawn.get(this.currentKey)?.push([]); // Start a new list of waypoints
+
+        // Update the waypoint list selector
+        const waypointListSelector = document.querySelector<HTMLSelectElement>("select");
+        if (waypointListSelector) {
+            this.updateWaypointListSelector(waypointListSelector);
+        }
+
+        console.log(`Started a new waypoint list for ${this.currentKey}`);
         this.displayExistingData();
     }
 
     private clearWaypoints(): void {
         // Remove all waypoint meshes from the scene
         this.scene.meshes
-            .filter(mesh => mesh.name === "waypoint")
+            .filter(mesh => mesh.name.startsWith("waypoint_")) // Ensure it matches the waypoint naming convention
             .forEach(mesh => mesh.dispose());
 
-        // Clear the waypoints array
+        // Clear the waypoints data structure
         this.waypointsByLevelAndSpawn.clear();
         this.displayExistingData();
         console.log("All waypoints cleared.");
     }
 
+    private clearCurrentWaypointList(): void {
+        const waypointLists = this.waypointsByLevelAndSpawn.get(this.currentKey) || [];
+        if (waypointLists[this.waypointListIndex]) {
+            waypointLists[this.waypointListIndex] = []; // Clear the current list
+            this.displayWaypointsOfCurrentList(); // Refresh the display
+            this.displayExistingData();
+            console.log(`Cleared waypoints for list ${this.waypointListIndex + 1} in ${this.currentKey}`);
+        }
+    }
+
+    private visualizeSpawnPositions(): void {
+        // Clear existing spawn meshes
+        this.scene.meshes
+            .filter(mesh => mesh.name.startsWith("spawn_")) // Use a unique prefix
+            .forEach(mesh => mesh.dispose());
+
+        // Visualize spawn positions
+        this.spawnPositions.forEach((spawn, index) => {
+            const sphere = BABYLON.MeshBuilder.CreateSphere(`spawn_${index}`, { diameter: 1.5 }, this.scene); // Unique name
+            sphere.position = spawn.clone();
+            sphere.position.y += 1; // Adjust height to avoid conflicts with other objects
+            sphere.material = new BABYLON.StandardMaterial(`spawnMat_${index}`, this.scene); // Unique material name
+            (sphere.material as BABYLON.StandardMaterial).diffuseColor = BABYLON.Color3.Blue(); // Ensure blue color
+        });
+
+        console.log("Spawn positions visualized:", this.spawnPositions);
+    }
+
     private clearSpawns(): void {
         // Remove all spawn meshes from the scene
         this.scene.meshes
-            .filter(mesh => mesh.name === "spawn")
+            .filter(mesh => mesh.name.startsWith("spawn_")) // Ensure it matches the spawn naming convention
             .forEach(mesh => mesh.dispose());
 
         // Clear the spawn positions array
         this.spawnPositions = [];
         this.displayExistingData();
         console.log("All spawn positions cleared.");
+    }
+
+    public clearAllData(): void {
+        // Clear all waypoints
+        this.waypointsByLevelAndSpawn.clear();
+        this.scene.meshes
+            .filter(mesh => mesh.name === "waypoint")
+            .forEach(mesh => mesh.dispose());
+
+        // Clear all spawn positions
+        this.spawnPositions = [];
+        this.scene.meshes
+            .filter(mesh => mesh.name === "spawn")
+            .forEach(mesh => mesh.dispose());
+
+        // Clear localStorage data
+        localStorage.clear();
+
+        // Refresh UI
+        this.displayExistingData();
+        console.log("All waypoints and spawn points have been cleared.");
     }
 
     private displayExistingData(): void {

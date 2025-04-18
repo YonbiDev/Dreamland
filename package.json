@@ -20,6 +20,7 @@
   "dependencies": {
     "babylonjs": "^7.53.3",
     "babylonjs-loaders": "^7.53.3",
-    "cannon": "^0.6.2"
+    "cannon": "^0.6.2",
+    "cannon-es": "^0.20.0"
   }
 }
