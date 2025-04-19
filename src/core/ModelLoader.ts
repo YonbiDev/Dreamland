@@ -1,12 +1,22 @@
-
 export class ModelLoader {
-    constructor(scene: BABYLON.Scene,nameOfObject: String) {
-        BABYLON.SceneLoader.ImportMeshAsync("", "", `${nameOfObject}.glb`, scene).then((result) => {
-            result.meshes.forEach(mesh => {
-              //  console.log(mesh.name); // Afficher les noms des objets
-                mesh.checkCollisions = true; // Activer les collisions
-            });
-        });
-        
+    static loadModel(
+        scene: BABYLON.Scene,
+        modelName: string,
+        callback: (result: {
+            meshes: BABYLON.AbstractMesh[];
+            particleSystems: BABYLON.IParticleSystem[];
+            skeletons: BABYLON.Skeleton[];
+            animationGroups: BABYLON.AnimationGroup[];
+        }) => void
+    ): void {
+        BABYLON.SceneLoader.ImportMesh(
+            "",
+            "/",
+            `${modelName}.glb`,
+            scene,
+            (meshes, particleSystems, skeletons, animationGroups) => {
+                callback({ meshes, particleSystems, skeletons, animationGroups });
+            }
+        );
     }
 }

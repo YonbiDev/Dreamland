@@ -1,5 +1,5 @@
-import { DumpData } from "babylonjs/Misc/dumpTools";
 import { deleteEnemey, getEnemies } from "../game";
+import { ModelLoader } from "./ModelLoader";
 
 export class Enemy {
     mesh: BABYLON.Mesh;
@@ -18,21 +18,20 @@ export class Enemy {
         // Load waypoints for the given level and spawn label
         this.waypoints = this.loadRandomWaypoints(level, spawnLabel);
 
-        // Créer un cube ennemi avec un nom unique
-        this.mesh = BABYLON.MeshBuilder.CreateBox(`enemy_${Date.now()}`, { size: 3 }, scene); // Unique name
-        this.mesh.position = position;
+        // Load the "Slime_01_MeltalHelmet.glb" model
+        ModelLoader.loadModel(scene, "Slime_01_MeltalHelmet", result => {
+            this.mesh = result.meshes[0] as BABYLON.Mesh; // Use the first mesh from the loaded model
+            this.mesh.position = position;
+            this.mesh.scaling.scaleInPlace(4); // Scale down the model
 
-        // Set the material to white
-        this.mesh.material = new BABYLON.StandardMaterial(`enemyMat_${Date.now()}`, this.scene); // Unique material name
-        (this.mesh.material as BABYLON.StandardMaterial).diffuseColor = BABYLON.Color3.White(); // Ensure white color
+            // Start moving if waypoints are provided
+            if (this.waypoints.length > 0) {
+                this.moveToNextWaypoint();
+            }
 
-        // Start moving if waypoints are provided
-        if (this.waypoints.length > 0) {
-            this.moveToNextWaypoint();
-        }
-
-        this.mesh.metadata = this.mesh.metadata || {};
-        this.mesh.metadata.enemyInstance = this;
+            this.mesh.metadata = this.mesh.metadata || {};
+            this.mesh.metadata.enemyInstance = this;
+        });
 
         this.randomSpeedOffset = Math.random() * 0.05 - 0.025; // Random speed offset between -0.025 and 0.025
     }
@@ -140,6 +139,9 @@ export class Enemy {
         }
 
         const target = this.waypoints[this.currentWaypointIndex];
+        this.mesh.lookAt(target);
+
+        console.log(`Enemy moving towards waypoint: ${target.toString()}`);
         const moveInterval = setInterval(() => {
             const direction = target.subtract(this.mesh.position).normalize();
             const distance = BABYLON.Vector3.Distance(this.mesh.position, target);
@@ -159,6 +161,9 @@ export class Enemy {
             const moveVector = adjustedDirection.scale(adjustedSpeed);
             this.mesh.moveWithCollisions(moveVector);
 
+            // Continuously make the enemy face the waypoint
+            
+
             if (distance < 0.5) { // Adjust threshold for reaching the waypoint
                 // Reached the waypoint
                 clearInterval(moveInterval);
@@ -175,9 +180,13 @@ export class Enemy {
     }
 
     update(deltaTime: number) {
+        if (!this.mesh) {
+            console.warn("Enemy mesh is not yet loaded.");
+            return;
+        }
+
         if (this.waypoints && this.waypoints.length > 0) {
             const target = this.waypoints[0];
-            console.log(`Current target waypoint: ${target.toString()}`);
 
             const direction = target.subtract(this.mesh.position).normalize();
             const distance = BABYLON.Vector3.Distance(this.mesh.position, target);
@@ -195,6 +204,7 @@ export class Enemy {
 
             if (distance > 0.1) {
                 this.mesh.position.addInPlace(adjustedDirection.scale(adjustedSpeed * deltaTime));
+                // Make the enemy face the waypoint
             } else {
                 console.log(`Reached waypoint: ${target.toString()}`);
                 this.waypoints.shift();

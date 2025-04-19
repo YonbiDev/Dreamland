@@ -38,8 +38,11 @@ export class Game {
         // new BoxManager(this.scene, grid.getMesh());
 
         new UIManager(this.scene, this.canvas);
-        // Chargement des modèles
-        new ModelLoader(this.scene, "LandMass");
+
+        // Load the "LandMass" model
+        ModelLoader.loadModel(this.scene, "LandMass", result => {
+            console.log("LandMass model loaded:", result.meshes);
+        });
 
         // Ajout d'une lumière
         new BABYLON.HemisphericLight("light", new BABYLON.Vector3(2, 10, 10), this.scene);
