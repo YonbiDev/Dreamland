@@ -2,7 +2,7 @@ import "babylonjs-loaders"
 import { CameraController } from "./core/CameraController";
 import { ModelLoader } from "./core/ModelLoader";
 import { Turret } from "./core/Turret";
-import { Enemy } from "./core/Enemy";
+import { Enemy, Slime, Viking } from "./core/Enemy";
 import { UIManager } from "./core/UIManager";
 import { WaypointEditor } from "./core/WaypointEditor";
 import { WaypointManager } from "./core/WaypointManager";
@@ -67,8 +67,10 @@ export class Game {
         // Initialize the WaveManager
         waveManager = new WaveManager(this.scene, WaypointManager);
 
+        // Example: Add different types of enemies
+
         // Start the first wave
-        waveManager.startWave(1, "level1_spawnpoint1", 2); // 5 enemies for wave 1
+        waveManager.startWave(1, "level1_spawnpoint1", 5); // 5 enemies for wave 1
 
         this.engine.runRenderLoop(() => {
             const deltaTime = this.engine.getDeltaTime() / 1000; // Convertir en secondes

@@ -10,3 +10,5 @@ setInterval(() => {
         }
     }
 }, 1000); // Check every second
+
+// Enemies now handle their own updates, no need to call update globally

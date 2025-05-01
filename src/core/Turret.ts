@@ -8,10 +8,12 @@ export class Turret {
     target: BABYLON.Mesh | null = null;
     fireRate: number = 1000;
     lastShotTime: number = 0;
+    projectileSpeed: number; // Speed of the projectiles fired by this turret
 
-    constructor(scene: BABYLON.Scene, position: BABYLON.Vector3, range: number = 10) {
+    constructor(scene: BABYLON.Scene, position: BABYLON.Vector3, range: number = 10, projectileSpeed: number = 20) {
         this.scene = scene;
         this.range = range;
+        this.projectileSpeed = projectileSpeed; // Initialize projectile speed
 
         this.mesh = BABYLON.MeshBuilder.CreateBox("turret", { size: 3 }, scene);
         this.mesh.position = position;
@@ -29,7 +31,7 @@ export class Turret {
         let closestDist = this.range;
 
         enemies.forEach(enemy => {
-            if (!enemy.mesh || !enemy.mesh.isDisposed()) { // Ensure the enemy is valid
+            if (enemy.mesh) { // Ensure the enemy is valid
                 const distance = BABYLON.Vector3.Distance(this.mesh.position, enemy.mesh.position);
                 if (distance < closestDist) {
                     closestDist = distance;
@@ -47,10 +49,8 @@ export class Turret {
     shoot() {
         const now = Date.now();
         if (now - this.lastShotTime > this.fireRate) {
-            new Projectile(this.scene, this.mesh.position.clone(), this.target!);
+            new Projectile(this.scene, this.mesh.position.clone(), this.target!, this.projectileSpeed); // Pass projectile speed
             this.lastShotTime = now;
-
-            
         }
     }
 }

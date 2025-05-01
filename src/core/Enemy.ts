@@ -7,11 +7,12 @@ export class Enemy {
     health: number;
     waypoints: BABYLON.Vector3[];
     currentWaypointIndex: number = 0;
-    speed: number = 0.1; // Movement speed
+    speed: number = 20 // Movement speed
     private movementVariation: number = 0.02; // Variation factor for natural movement
     private randomSpeedOffset: number;
+    private updateInterval: number;
 
-    constructor(scene: BABYLON.Scene, position: BABYLON.Vector3, health: number = 10, level: string, spawnLabel: string) {
+    constructor(scene: BABYLON.Scene, modelName: string, position: BABYLON.Vector3, health: number = 10, level: string, spawnLabel: string) {
         this.scene = scene;
         this.health = health;
 
@@ -19,21 +20,18 @@ export class Enemy {
         this.waypoints = this.loadRandomWaypoints(level, spawnLabel);
 
         // Load the "Slime_01_MeltalHelmet.glb" model
-        ModelLoader.loadModel(scene, "Slime_01_MeltalHelmet", result => {
+        ModelLoader.loadModel(scene, modelName, result => {
             this.mesh = result.meshes[0] as BABYLON.Mesh; // Use the first mesh from the loaded model
             this.mesh.position = position;
             this.mesh.scaling.scaleInPlace(4); // Scale down the model
-
-            // Start moving if waypoints are provided
-            if (this.waypoints.length > 0) {
-                this.moveToNextWaypoint();
-            }
-
             this.mesh.metadata = this.mesh.metadata || {};
             this.mesh.metadata.enemyInstance = this;
+            
+            this.moveToNextWaypoint();
         });
 
-        this.randomSpeedOffset = Math.random() * 0.05 - 0.025; // Random speed offset between -0.025 and 0.025
+        // Start the update loop for this enemy
+        this.updateInterval = window.setInterval(() => this.update(16), 16); // ~60 FPS
     }
 
     private static getRandomSpawnPoint(level: number, spawnPositionNumber: number): BABYLON.Vector3 | null {
@@ -96,7 +94,7 @@ export class Enemy {
             return null;
         }
 
-        return new Enemy(scene, spawnPoint, 10, level.toString(), spawnPositionNumber.toString());
+        return new Enemy(scene, "", spawnPoint, 10, level.toString(), spawnPositionNumber.toString());
     }
 
     loadRandomWaypoints(level: string, spawnLabel: string): BABYLON.Vector3[] {
@@ -132,17 +130,26 @@ export class Enemy {
         return waypointLists[randomListIndex].map(wp => wp.clone());
     }
 
-    private moveToNextWaypoint(): void {
+    protected moveToNextWaypoint(): void {
         if (this.currentWaypointIndex >= this.waypoints.length) {
             console.log("Enemy reached the final waypoint.");
             return; // Stop moving if no more waypoints
         }
 
         const target = this.waypoints[this.currentWaypointIndex];
-        this.mesh.lookAt(target);
+        console.log(`Moving towards waypoint: ${target.toString()}`);
+        // this.mesh.lookAt(target);
 
         console.log(`Enemy moving towards waypoint: ${target.toString()}`);
         const moveInterval = setInterval(() => {
+            if (!target || !this.mesh || !this.mesh.position) {
+                console.error("Target or mesh position is undefined:", { target, mesh: this.mesh });
+                clearInterval(moveInterval);
+                return;
+            }
+
+            if(!target)
+                return;
             const direction = target.subtract(this.mesh.position).normalize();
             const distance = BABYLON.Vector3.Distance(this.mesh.position, target);
 
@@ -162,7 +169,7 @@ export class Enemy {
             this.mesh.moveWithCollisions(moveVector);
 
             // Continuously make the enemy face the waypoint
-            
+
 
             if (distance < 0.5) { // Adjust threshold for reaching the waypoint
                 // Reached the waypoint
@@ -186,28 +193,21 @@ export class Enemy {
         }
 
         if (this.waypoints && this.waypoints.length > 0) {
-            const target = this.waypoints[0];
-
+            
+            const target = this.waypoints[this.currentWaypointIndex];
+            if(target == null)
+                return;
             const direction = target.subtract(this.mesh.position).normalize();
             const distance = BABYLON.Vector3.Distance(this.mesh.position, target);
 
-            // Add slight random variation to direction
-            const variation = new BABYLON.Vector3(
-                (Math.random() - 0.5) * this.movementVariation,
-                (Math.random() - 0.5) * this.movementVariation,
-                (Math.random() - 0.5) * this.movementVariation
-            );
-            const adjustedDirection = direction.add(variation).normalize();
-
-            // Adjust speed with random offset
-            const adjustedSpeed = this.speed + this.randomSpeedOffset;
-
             if (distance > 0.1) {
-                this.mesh.position.addInPlace(adjustedDirection.scale(adjustedSpeed * deltaTime));
-                // Make the enemy face the waypoint
+                this.mesh.moveWithCollisions(direction.scale(this.speed * deltaTime / 1000));
             } else {
                 console.log(`Reached waypoint: ${target.toString()}`);
-                this.waypoints.shift();
+                this.currentWaypointIndex++;
+                if (this.currentWaypointIndex >= this.waypoints.length) {
+                    console.log("No more waypoints to follow.");
+                }
             }
         } else {
             console.warn("No more waypoints to follow.");
@@ -224,8 +224,32 @@ export class Enemy {
     }
 
     destroy() {
+        // Clear the update interval when the enemy is destroyed
+        clearInterval(this.updateInterval);
         deleteEnemey(this);
         this.mesh.dispose();
         console.log("enemy supprimer de la liste");
+    }
+}
+
+export class Slime extends Enemy {
+    constructor(scene: BABYLON.Scene, position: BABYLON.Vector3, level: string, spawnLabel: string) {
+        super(scene, "Slime_01_MeltalHelmet", position, 10, level, spawnLabel); // Slime has 10 HP by default
+        this.speed = 5; // Slime-specific speed
+
+    }
+}
+
+export class Viking extends Enemy {
+    constructor(scene: BABYLON.Scene, position: BABYLON.Vector3, level: string, spawnLabel: string) {
+        super(scene, "Slime_01_Viking", position, 20, level, spawnLabel); // Viking has 20 HP by default
+        this.speed = 10; // Viking-specific speed
+
+    }
+
+    // Override moveToNextWaypoint to add Viking-specific behavior
+    protected moveToNextWaypoint(): void {
+        console.log("Viking is charging towards the next waypoint!");
+        super.moveToNextWaypoint();
     }
 }

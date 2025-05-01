@@ -5,14 +5,30 @@ export class Projectile {
     scene: BABYLON.Scene;
     targetMesh: BABYLON.Mesh | null;
     damageValue: number = 5; // Dégâts du projectile
+    speed: number; // Speed of the projectile
 
-    constructor(scene: BABYLON.Scene, position: BABYLON.Vector3, targetMesh: BABYLON.Mesh) {
+    constructor(scene: BABYLON.Scene, position: BABYLON.Vector3, targetMesh: BABYLON.Mesh, speed: number) {
         this.scene = scene;
         this.targetMesh = targetMesh;
+        this.speed = speed; // Initialize speed
+
+        // Vérifier si la physique est activée dans la scène
+        if (!scene.isPhysicsEnabled()) {
+            console.warn("⚠️ La physique n'est pas activée dans la scène. Activation en cours...");
+            scene.enablePhysics(new BABYLON.Vector3(0, 0, 0), new BABYLON.CannonJSPlugin());
+        }
 
         // Créer une sphère comme projectile
         this.mesh = BABYLON.MeshBuilder.CreateSphere("projectile", { diameter: 1 }, scene);
         this.mesh.position = position;
+
+        // Activer la physique pour le projectile
+        this.mesh.physicsImpostor = new BABYLON.PhysicsImpostor(
+            this.mesh,
+            BABYLON.PhysicsImpostor.SphereImpostor,
+            { mass: 1, restitution: 0.1 },
+            scene
+        );
 
         this.moveToTarget();
     }
@@ -20,18 +36,20 @@ export class Projectile {
     moveToTarget() {
         if (!this.targetMesh) return;
 
-        BABYLON.Animation.CreateAndStartAnimation(
-            "moveProjectile",
-            this.mesh,
-            "position",
-            60,
-            20,
-            this.mesh.position,
-            this.targetMesh.position,
-            BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT,
-            null,
-            () => this.hitTarget()
-        );
+        this.scene.onBeforeRenderObservable.add(() => {
+            if (!this.targetMesh || !this.mesh || !this.mesh.physicsImpostor) return;
+
+            const direction = this.targetMesh.position.subtract(this.mesh.position).normalize();
+            const velocity = direction.scale(this.speed);
+
+            // Mettre à jour la vitesse pour suivre la cible
+            this.mesh.physicsImpostor.setLinearVelocity(velocity);
+
+            const distance = BABYLON.Vector3.Distance(this.mesh.position, this.targetMesh.position);
+            if (distance <= 0.5) { // Threshold for hitting the target
+                this.hitTarget();
+            }
+        });
     }
 
     hitTarget() {
@@ -43,6 +61,11 @@ export class Projectile {
             enemy.damage(this.damageValue); // ✅ Appelle `damage()` sur l'ennemi
         }
 
+        this.dispose();
+    }
+
+    private dispose() {
+        this.mesh.physicsImpostor?.dispose(); // Supprime la physique
         this.mesh.dispose(); // Supprime le projectile
     }
 }
