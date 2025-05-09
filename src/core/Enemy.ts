@@ -165,7 +165,9 @@ export class Enemy {
 
     protected moveToNextWaypoint(): void {
         if (this.currentWaypointIndex >= this.waypoints.length) {
-            console.log("Enemy reached the final waypoint.");
+              console.log("Enemy reached the last waypoint. Decreasing health.");
+                    this.scene.getEngine().getRenderingCanvas()?.dispatchEvent(new CustomEvent("enemyReachedEnd"));
+                    this.destroy();
             return; // Stop moving if no more waypoints
         }
 
@@ -229,10 +231,8 @@ export class Enemy {
         }
 
         if (this.waypoints && this.waypoints.length > 0) {
-            
             const target = this.waypoints[this.currentWaypointIndex];
-            if(target == null)
-                return;
+            if (target == null) return;
             const direction = target.subtract(this.mesh.position).normalize();
             const distance = BABYLON.Vector3.Distance(this.mesh.position, target);
 
@@ -242,7 +242,7 @@ export class Enemy {
                 console.log(`Reached waypoint: ${target.toString()}`);
                 this.currentWaypointIndex++;
                 if (this.currentWaypointIndex >= this.waypoints.length) {
-                    console.log("No more waypoints to follow.");
+                  
                 }
             }
         } else {
@@ -271,7 +271,7 @@ export class Enemy {
 export class Slime extends Enemy {
     constructor(scene: BABYLON.Scene, position: BABYLON.Vector3, level: string, spawnLabel: string) {
         super(scene, "Slime_03", position, 10, level, spawnLabel); // Slime has 10 HP by default
-        this.speed = 5; // Slime-specific speed
+        this.speed = 10; // Slime-specific speed
 
     }
 }

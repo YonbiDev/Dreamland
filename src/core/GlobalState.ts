@@ -1,3 +1,4 @@
+import { Game } from "../game";
 import { Enemy } from "./Enemy";
 
 export const enemies: Enemy[] = [];
@@ -12,3 +13,12 @@ setInterval(() => {
 }, 1000); // Check every second
 
 // Enemies now handle their own updates, no need to call update globally
+
+const canvas = document.querySelector("canvas");
+if (canvas) {
+    canvas.addEventListener("enemyReachedEnd", () => {
+        const currentHealth = Game.getHealth();
+        Game.setHealth(currentHealth - 1);
+        console.log(`Health decreased. Current health: ${Game.getHealth()}`);
+    });
+}

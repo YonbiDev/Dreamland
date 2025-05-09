@@ -23,7 +23,7 @@ export class MenuManager {
 
         // Add title
         const title = document.createElement("h1");
-        title.innerText = "Defenders of Dreamfall";
+        title.innerText = "Les Défenseurs de Dreamfall";
         title.style.color = "white";
         title.style.marginBottom = "20px";
         title.style.fontSize = "48px";
@@ -84,15 +84,49 @@ export class MenuManager {
         mouseEffect.style.transition = "transform 0.1s, opacity 0.1s";
         menuContainer.appendChild(mouseEffect);
 
-        menuContainer.onmousemove = (event) => {
-            mouseEffect.style.transform = `translate(${event.clientX - 10}px, ${event.clientY - 10}px) scale(1)`;
-            mouseEffect.style.opacity = "1";
-        };
+        
 
         menuContainer.onmouseleave = () => {
             mouseEffect.style.opacity = "0";
         };
 
+    menuContainer.onmousemove = (event) => {
+    // Update main cursor effect
+    const size = 20;
+    mouseEffect.style.left = `${event.clientX - size / 2}px`;
+    mouseEffect.style.top = `${event.clientY - size / 2}px`;
+    mouseEffect.style.opacity = "1";
+
+    // Create a particle
+    const particle = document.createElement("div");
+    const particleSize = Math.random() * 6 + 4; // 4px to 10px
+    particle.style.position = "absolute";
+    particle.style.left = `${event.clientX - particleSize / 2}px`;
+    particle.style.top = `${event.clientY - particleSize / 2}px`;
+    particle.style.width = `${particleSize}px`;
+    particle.style.height = `${particleSize}px`;
+    particle.style.borderRadius = "50%";
+    particle.style.backgroundColor = `rgba(255, 255, 255, ${Math.random() * 0.8 + 0.2})`;
+    particle.style.pointerEvents = "none";
+    particle.style.zIndex = "1001";
+    particle.style.opacity = "1";
+    particle.style.transition = "all 0.5s ease-out";
+
+    // Slight movement (optional)
+    const offsetX = (Math.random() - 0.5) * 30;
+    const offsetY = (Math.random() - 0.5) * 30;
+    requestAnimationFrame(() => {
+        particle.style.transform = `translate(${offsetX}px, ${offsetY}px)`;
+        particle.style.opacity = "0";
+    });
+
+    menuContainer.appendChild(particle);
+
+    // Remove after fade
+    setTimeout(() => {
+        menuContainer.removeChild(particle);
+    }, 500);
+};
         document.body.appendChild(menuContainer);
     }
 

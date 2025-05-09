@@ -7,6 +7,9 @@ export class WaveManager {
     private waypointManager: typeof WaypointManager;
     private enemiesToSpawn: number;
     private spawnKey: string;
+    private totalWaves: number = 2; // Example total number of waves
+    private currentWave: number = 0; // Track the current wave
+    private currentWaveEnemies: Enemy[] = []; // Track enemies of the current wave
 
     constructor(scene: BABYLON.Scene, waypointManager: typeof WaypointManager) {
         this.scene = scene;
@@ -18,6 +21,8 @@ export class WaveManager {
     public startWave(waveNumber: number, spawnKey: string, enemyCount: number): void {
         this.enemiesToSpawn = enemyCount;
         this.spawnKey = spawnKey;
+        this.currentWave = waveNumber; // Update the current wave
+        this.currentWaveEnemies = []; // Reset the current wave enemies
 
         const spawnPositions = this.waypointManager.loadSpawnPositions(1, waveNumber, spawnKey);
 
@@ -41,7 +46,9 @@ export class WaveManager {
                 spriteManager.cellWidth = 896 / 14;
                 spriteManager.cellHeight = 69 / 1;
                 // Spawn the enemy
-                enemies.push(new Slime(this.scene, spawnPosition, "1", "1"));
+                const enemy = new Slime(this.scene, spawnPosition, "1", "1");
+                enemies.push(enemy);
+                this.currentWaveEnemies.push(enemy); // Track the enemy for the current wave
                 console.log(`Enemy ${i + 1} spawned at ${spawnPosition}`);
             }, i * 3000); // Delay of 3000ms between each spawn
         }
@@ -50,6 +57,11 @@ export class WaveManager {
     }
 
     public isWaveComplete(): boolean {
-        return enemies.length === 0;
+        // Check if all enemies of the current wave are dead
+        return this.currentWaveEnemies.every(enemy => !enemy.mesh || enemy.mesh.isDisposed());
+    }
+
+    public areAllWavesComplete(): boolean {
+        return this.currentWave >= this.totalWaves && this.isWaveComplete();
     }
 }

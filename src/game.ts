@@ -12,11 +12,14 @@ import { enemies } from "./core/GlobalState";
 let waveManager: WaveManager;
 
 export class Game {
+    
     private engine: BABYLON.Engine;
     private scene: BABYLON.Scene;
     private canvas: HTMLCanvasElement;
     private uiManager: UIManager;
     private coins: number = 5; // Initialize with 5 coins
+    
+    static health: number = 10;
 
     constructor() {
         this.canvas = document.getElementById("renderCanvas") as HTMLCanvasElement;
@@ -36,9 +39,9 @@ export class Game {
         // Show cinematic bars and add start wave button
         this.uiManager.showCinematicBars();
         this.uiManager.addStartWaveButton(() => {
+            if(waveManager)
             waveManager.startWave(1, "level1_spawnpoint1", 5); // Example wave start
         });
-
 
         // Load the "LandMass" model
         ModelLoader.loadModel(this.scene, "LandMass", result => {
@@ -86,15 +89,64 @@ export class Game {
             enemies.forEach(enemy => enemy.update(deltaTime));
 
             // Check if the wave is complete and start the next wave
-            if (waveManager.isWaveComplete()) {
-                console.log("Wave complete!");
-            }
+                          if (waveManager.areAllWavesComplete()) {
+                    this.showVictoryScene(); // Show victory scene if all waves are complete
+                } 
 
             this.scene.render();
         });
     }
 
-    
+    private showVictoryScene(): void {
+        // Clear the scene
+        this.scene.dispose();
+
+        // Create a new scene for the victory screen
+        const victoryScene = new BABYLON.Scene(this.engine);
+
+        // Add a background
+        const background = new BABYLON.Layer("background", "victoryBackground.png", victoryScene);
+
+        // Add victory text
+        const victoryText = document.createElement("div");
+        victoryText.innerText = "Victoire!";
+        victoryText.style.position = "absolute";
+        victoryText.style.top = "30%";
+        victoryText.style.left = "50%";
+        victoryText.style.transform = "translate(-50%, -50%)";
+        victoryText.style.fontSize = "48px";
+        victoryText.style.color = "white";
+        victoryText.style.textShadow = "2px 2px 8px rgba(0, 0, 0, 0.7)";
+        victoryText.style.zIndex = "1001";
+        document.body.appendChild(victoryText);
+
+        // Add a button to return to the main menu
+        const mainMenuButton = document.createElement("button");
+        mainMenuButton.innerText = "Retour au Menu Principal";
+        mainMenuButton.style.position = "absolute";
+        mainMenuButton.style.top = "50%";
+        mainMenuButton.style.left = "50%";
+        mainMenuButton.style.transform = "translate(-50%, -50%)";
+        mainMenuButton.style.padding = "15px 30px";
+        mainMenuButton.style.fontSize = "20px";
+        mainMenuButton.style.color = "white";
+        mainMenuButton.style.backgroundColor = "green";
+        mainMenuButton.style.border = "none";
+        mainMenuButton.style.borderRadius = "10px";
+        mainMenuButton.style.cursor = "pointer";
+        mainMenuButton.style.boxShadow = "0 4px 8px rgba(0, 0, 0, 0.3)";
+        mainMenuButton.style.zIndex = "1001";
+        mainMenuButton.onclick = () => {
+            document.body.innerHTML = ""; // Clear the victory screen
+            window.location.reload(); // Reload to show the main menu
+        };
+        document.body.appendChild(mainMenuButton);
+
+        // Render the victory scene
+        this.engine.runRenderLoop(() => {
+            victoryScene.render();
+        });
+    }
 
     public getCoins(): number {
         return this.coins;
@@ -109,6 +161,17 @@ export class Game {
         this.coins += amount;
         this.uiManager.updateCoinDisplay(); // Update the UI
     }
+
+
+    static getHealth(): number {
+        return this.health;
+    }
+
+    static setHealth(newHealth: number) {
+        this.health = newHealth;
+    }
+    
+
 }
 
 export function initializeScene(engine: BABYLON.Engine): BABYLON.Scene {

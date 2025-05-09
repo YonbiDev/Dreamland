@@ -1,6 +1,7 @@
 import { ObjectManager } from "./ObjectManager";
 import { ModelLoader } from "./ModelLoader";
 import { Game } from "../game";
+import { int } from "babylonjs";
 
 export class UIManager {
     private scene: BABYLON.Scene;
@@ -124,7 +125,7 @@ export class UIManager {
 
         // Add health text
         this.healthDisplay = document.createElement("div");
-        this.healthDisplay.innerText = `Santé: 10`; // Initial health
+        this.healthDisplay.innerText = `Santé: ${Game.health}`; // Initial health
         healthContainer.appendChild(this.healthDisplay);
 
         document.body.appendChild(healthContainer);
@@ -132,7 +133,14 @@ export class UIManager {
         
         // Add mouse trail effect
         this.addMouseTrailEffect();
+
+
+            this.canvas.addEventListener("enemyReachedEnd", this.enemyReachedEnd.bind(this));
     }
+
+    private enemyReachedEnd(event: Event): void {
+   this.decreaseHealth(1);
+}
 private addMouseTrailEffect(): void {
         const trailMaterial = new BABYLON.StandardMaterial("trailMaterial", this.scene);
         trailMaterial.emissiveColor = new BABYLON.Color3(1, 0, 0); // Red color for the trail
@@ -153,10 +161,60 @@ private addMouseTrailEffect(): void {
         }
     }
 
-    public updateHealthDisplay(health: number): void {
+    public updateHealthDisplay(): void {
         if (this.healthDisplay) {
-            this.healthDisplay.innerText = `Santé: ${health}`;
+            this.healthDisplay.innerText = `Santé: ${Game.health}`;
         }
+        if (Game.health <= 0) {
+            this.showGameOverMenu();
+        }
+    }
+
+    public decreaseHealth(amount: number): void {
+        Game.health = Game.health  - amount; // Assuming 'health' is a static property of the Game class
+        this.updateHealthDisplay();
+    }
+
+    private showGameOverMenu(): void {
+        // Create game over container
+        const gameOverContainer = document.createElement("div");
+        gameOverContainer.style.position = "absolute";
+        gameOverContainer.style.top = "0";
+        gameOverContainer.style.left = "0";
+        gameOverContainer.style.width = "100%";
+        gameOverContainer.style.height = "100%";
+        gameOverContainer.style.display = "flex";
+        gameOverContainer.style.flexDirection = "column";
+        gameOverContainer.style.justifyContent = "center";
+        gameOverContainer.style.alignItems = "center";
+        gameOverContainer.style.backgroundColor = "rgba(0, 0, 0, 0.8)";
+        gameOverContainer.style.zIndex = "1000";
+        document.body.appendChild(gameOverContainer);
+
+        // Add "Game Over" text
+        const gameOverText = document.createElement("div");
+        gameOverText.innerText = "Game Over";
+        gameOverText.style.color = "red";
+        gameOverText.style.fontSize = "48px";
+        gameOverText.style.marginBottom = "20px";
+        gameOverContainer.appendChild(gameOverText);
+
+        // Add button to return to main menu
+        const mainMenuButton = document.createElement("button");
+        mainMenuButton.innerText = "Retour au menu principal";
+        mainMenuButton.style.padding = "10px 20px";
+        mainMenuButton.style.fontSize = "24px";
+        mainMenuButton.style.color = "white";
+        mainMenuButton.style.backgroundColor = "blue";
+        mainMenuButton.style.border = "none";
+        mainMenuButton.style.borderRadius = "5px";
+        mainMenuButton.style.cursor = "pointer";
+        gameOverContainer.appendChild(mainMenuButton);
+
+        mainMenuButton.onclick = () => {
+            // Logic to navigate to the main menu
+            window.location.reload(); // Example: Reload the page to simulate returning to the main menu
+        };
     }
 
     private createPlaceholder(container: HTMLElement, objectType: string, imagePath: string, altText: string, tooltipContent: string): void {
@@ -411,10 +469,10 @@ private addMouseTrailEffect(): void {
     public addStartWaveButton(onStartWave: () => void): void {
         const startWaveButton = document.createElement("button");
         startWaveButton.innerText = "Démarrer la vague";
-        startWaveButton.style.position = "absolute";
-        startWaveButton.style.top = "50%";
-        startWaveButton.style.right = "20px";
-        startWaveButton.style.transform = "translateY(-50%)";
+    startWaveButton.style.position = "absolute";
+    startWaveButton.style.top = "calc(12% + 110px)"; // 50px du heart + ~60px de marge
+    startWaveButton.style.left = "10px";
+    startWaveButton.style.display = "flex"
         startWaveButton.style.padding = "10px 20px";
         startWaveButton.style.fontSize = "16px";
         startWaveButton.style.color = "white";
@@ -481,7 +539,7 @@ private addMouseTrailEffect(): void {
             waveStartContainer.style.position = "absolute";
             waveStartContainer.style.top = "0";
             waveStartContainer.style.left = "0";
-            waveStartContainer.style.width = "100%";
+            waveStartContainer.style.width = "150px";
             waveStartContainer.style.height = "100%";
             waveStartContainer.style.display = "flex";
             waveStartContainer.style.justifyContent = "center";
