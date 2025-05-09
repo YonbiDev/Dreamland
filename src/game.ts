@@ -16,6 +16,7 @@ export class Game {
     private scene: BABYLON.Scene;
     private canvas: HTMLCanvasElement;
     private uiManager: UIManager;
+    private coins: number = 5; // Initialize with 5 coins
 
     constructor() {
         this.canvas = document.getElementById("renderCanvas") as HTMLCanvasElement;
@@ -25,24 +26,28 @@ export class Game {
         this.init();
     }
 
-    private init(): void {
-        // Ajout de la caméra
+    private async init(): Promise<void> {
         new CameraController(this.scene, this.canvas);
+        this.uiManager = new UIManager(this.scene, this.canvas, this);
 
-        // Ajout de la grille
-        // const grid = new Grid(this.scene, 10, 30, 30);
-
-        // const ground = new Ground(this.scene);
-
-        // Gestion des boîtes
-        // new BoxManager(this.scene, grid.getMesh());
-
-        new UIManager(this.scene, this.canvas);
+        // Display initial coins
+        this.uiManager.showTemporaryText(`Vous avez ${this.coins} éclats de rêves!`, 3000);
 
         // Load the "LandMass" model
         ModelLoader.loadModel(this.scene, "LandMass", result => {
-            console.log("LandMass model loaded:", result.meshes);
+            //console.log("LandMass model loaded:", result.meshes);
         });
+
+        const audioEngine = await BABYLON.CreateAudioEngineAsync();
+
+        const backgroundMusic = await BABYLON.CreateSoundAsync("backgroundMusic", 
+            "music.mp3"
+        );
+
+        // Wait until audio engine is ready to play sounds.
+        await audioEngine.unlock();
+
+        backgroundMusic.play();
 
         // Ajout d'une lumière
         new BABYLON.HemisphericLight("light", new BABYLON.Vector3(2, 10, 10), this.scene);
@@ -67,11 +72,6 @@ export class Game {
         // Initialize the WaveManager
         waveManager = new WaveManager(this.scene, WaypointManager);
 
-        // Example: Add different types of enemies
-
-        // Start the first wave
-        waveManager.startWave(1, "level1_spawnpoint1", 5); // 5 enemies for wave 1
-
         this.engine.runRenderLoop(() => {
             const deltaTime = this.engine.getDeltaTime() / 1000; // Convertir en secondes
 
@@ -85,6 +85,20 @@ export class Game {
 
             this.scene.render();
         });
+    }
+
+    public getCoins(): number {
+        return this.coins;
+    }
+
+    public decreaseCoins(amount: number): void {
+        this.coins -= amount;
+        this.uiManager.updateCoinDisplay(); // Update the UI
+    }
+
+    public increaseCoins(amount: number): void {
+        this.coins += amount;
+        this.uiManager.updateCoinDisplay(); // Update the UI
     }
 }
 

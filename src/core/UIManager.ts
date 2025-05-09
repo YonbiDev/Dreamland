@@ -1,4 +1,6 @@
 import { ObjectManager } from "./ObjectManager";
+import { ModelLoader } from "./ModelLoader";
+import { Game } from "../game";
 
 export class UIManager {
     private scene: BABYLON.Scene;
@@ -9,10 +11,16 @@ export class UIManager {
     private objectManager: ObjectManager;
     private waypoints: BABYLON.Vector3[] = [];
     private isPlacingWaypoints: boolean = false;
+    private topBar: HTMLDivElement | null = null;
+    private bottomBar: HTMLDivElement | null = null;
+    private coinDisplay: HTMLDivElement | null = null;
+    private healthDisplay: HTMLDivElement | null = null;
+    private game: Game;
 
-    constructor(scene: BABYLON.Scene, canvas: HTMLCanvasElement) {
+    constructor(scene: BABYLON.Scene, canvas: HTMLCanvasElement, game: Game) {
         this.scene = scene;
         this.canvas = canvas;
+        this.game = game;
         this.objectManager = new ObjectManager(scene);
 
         this.createUI();
@@ -20,79 +28,255 @@ export class UIManager {
     }
 
     private createUI(): void {
-        // Button for placing the turret
-        const turretButton = document.createElement("div");
-        turretButton.innerText = "Place Turret";
-        turretButton.style.position = "absolute";
-        turretButton.style.bottom = "20px";
-        turretButton.style.left = "50%";
-        turretButton.style.transform = "translateX(-50%)";
-        turretButton.style.padding = "10px 20px";
-        turretButton.style.backgroundColor = "#333";
-        turretButton.style.color = "#fff";
-        turretButton.style.borderRadius = "5px";
-        turretButton.style.cursor = "pointer";
-        turretButton.onclick = () => this.startPlacingObject("turret");
-        document.body.appendChild(turretButton);
+        // Create a container for the UI
+        const uiContainer = document.createElement("div");
+        uiContainer.id = "uiContainer"; // Added ID for reference
+        uiContainer.style.position = "absolute";
+        uiContainer.style.bottom = "12%"; // Adjusted to place above the black bar
+        uiContainer.style.left = "50%";
+        uiContainer.style.transform = "translateX(-50%)";
+        uiContainer.style.display = "flex";
+        uiContainer.style.gap = "8px";
+        uiContainer.style.padding = "8px";
+        uiContainer.style.backgroundColor = "rgba(255, 255, 255, 0.95)";
+        uiContainer.style.borderRadius = "12px";
+        uiContainer.style.boxShadow = "0 4px 12px rgba(0, 0, 0, 0.15)";
+        document.body.appendChild(uiContainer);
+
+        // Add placeholders for objects
+        this.createPlaceholder(uiContainer, "turret", "Turret1Image.png", "Turret", `
+        <div style="text-align: left;">
+    <strong style="font-size: 14px; color: #4CAF50;">Tourelle</strong><br>
+    <span style="font-size: 12px;">Portée : <strong>30</strong></span><br>
+    <span style="font-size: 12px;">Vitesse d'attaque : <strong>2s</strong></span><br>
+    <span style="font-size: 12px;">Vitesse du projectile : <strong>50</strong></span><br>
+    <span style="font-size: 12px; color: #FFD700;">Prix : <strong>5 Éclats de Rêves</strong></span>
+</div>
+        `);
+
+        this.createPlaceholder(uiContainer, "placeholder2", "Placeholder2Image.png", "Placeholder 2", `
+            <div style="text-align: left;">
+                <strong style="font-size: 14px; color: #FF9800;">Placeholder 2</strong><br>
+                <span style="font-size: 12px;">Coming Soon...</span>
+            </div>
+        `);
+
+        this.createPlaceholder(uiContainer, "placeholder3", "Placeholder3Image.png", "Placeholder 3", `
+            <div style="text-align: left;">
+                <strong style="font-size: 14px; color: #FF5722;">Placeholder 3</strong><br>
+                <span style="font-size: 12px;">Coming Soon...</span>
+            </div>
+        `);
+
+        // Add coin display container
+        const coinContainer = document.createElement("div");
+        coinContainer.style.position = "absolute";
+        coinContainer.style.top = "10px";
+        coinContainer.style.left = "10px";
+        coinContainer.style.display = "flex";
+        coinContainer.style.alignItems = "center";
+        coinContainer.style.padding = "10px";
+        coinContainer.style.fontSize = "16px";
+        coinContainer.style.color = "white";
+        coinContainer.style.backgroundColor = "rgba(0, 0, 0, 0.7)";
+        coinContainer.style.borderRadius = "5px";
+        coinContainer.style.zIndex = "1001";
+
+        // Add coin image
+        const coinImage = document.createElement("img");
+        coinImage.src = "UI_Diamond.png"; // Path to the coin image
+        coinImage.alt = "Éclats de Rêves";
+        coinImage.style.width = "20px";
+        coinImage.style.height = "20px";
+        coinImage.style.marginRight = "8px";
+        coinContainer.appendChild(coinImage);
+
+        // Add coin text
+        this.coinDisplay = document.createElement("div");
+        this.coinDisplay.innerText = `Éclats de Rêves: ${this.game.getCoins()}`;
+        coinContainer.appendChild(this.coinDisplay);
+
+        document.body.appendChild(coinContainer);
+
+        // Add health display container
+        const healthContainer = document.createElement("div");
+        healthContainer.style.position = "absolute";
+        healthContainer.style.top = "40px";
+        healthContainer.style.left = "10px";
+        healthContainer.style.display = "flex";
+        healthContainer.style.alignItems = "center";
+        healthContainer.style.padding = "10px";
+        healthContainer.style.fontSize = "16px";
+        healthContainer.style.color = "white";
+        healthContainer.style.backgroundColor = "rgba(255, 0, 0, 0.7)";
+        healthContainer.style.borderRadius = "5px";
+        healthContainer.style.zIndex = "1001";
+
+        // Add health text
+        this.healthDisplay = document.createElement("div");
+        this.healthDisplay.innerText = `Santé: 10`; // Initial health
+        healthContainer.appendChild(this.healthDisplay);
+
+        document.body.appendChild(healthContainer);
+    }
+
+    public updateCoinDisplay(): void {
+        if (this.coinDisplay) {
+            this.coinDisplay.innerText = `Éclats de Rêves: ${this.game.getCoins()}`;
+        }
+    }
+
+    public updateHealthDisplay(health: number): void {
+        if (this.healthDisplay) {
+            this.healthDisplay.innerText = `Santé: ${health}`;
+        }
+    }
+
+    private createPlaceholder(container: HTMLElement, objectType: string, imagePath: string, altText: string, tooltipContent: string): void {
+        // Create a container for the placeholder
+        const placeholderContainer = document.createElement("div");
+        placeholderContainer.style.position = "relative";
+        placeholderContainer.style.width = "80px";
+        placeholderContainer.style.height = "80px";
+        placeholderContainer.style.borderRadius = "10px";
+        placeholderContainer.style.backgroundColor = "#f9f9f9";
+        placeholderContainer.style.boxShadow = "0 2px 6px rgba(0, 0, 0, 0.1)";
+        placeholderContainer.style.cursor = "pointer";
+        placeholderContainer.style.transition = "transform 0.2s ease, box-shadow 0.2s ease";
+        placeholderContainer.onmouseover = () => {
+            placeholderContainer.style.transform = "scale(1.1)";
+            placeholderContainer.style.boxShadow = "0 4px 12px rgba(0, 0, 0, 0.2)";
+            tooltip.style.display = "block";
+        };
+        placeholderContainer.onmouseout = () => {
+            placeholderContainer.style.transform = "scale(1)";
+            placeholderContainer.style.boxShadow = "0 2px 6px rgba(0, 0, 0, 0.1)";
+            tooltip.style.display = "none";
+        };
+        placeholderContainer.onclick = () => this.startPlacingObject(objectType);
+        container.appendChild(placeholderContainer);
+
+        // Add image to the placeholder
+        const placeholderImage = document.createElement("img");
+        placeholderImage.src = imagePath; // Replace with the actual image path
+        placeholderImage.alt = altText;
+        placeholderImage.style.width = "100%";
+        placeholderImage.style.height = "100%";
+        placeholderImage.style.borderRadius = "10px";
+        placeholderImage.style.objectFit = "cover";
+        placeholderContainer.appendChild(placeholderImage);
+
+        // Add tooltip for the placeholder
+        const tooltip = document.createElement("div");
+        tooltip.style.position = "absolute";
+        tooltip.style.bottom = "90%";
+        tooltip.style.left = "50%";
+        tooltip.style.transform = "translateX(-50%)";
+        tooltip.style.padding = "10px"; // Increased padding for better spacing
+        tooltip.style.width = "150px"; // Increased width for better readability
+        tooltip.style.backgroundColor = "#333";
+        tooltip.style.color = "#fff";
+        tooltip.style.borderRadius = "6px";
+        tooltip.style.boxShadow = "0 2px 6px rgba(0, 0, 0, 0.2)";
+        tooltip.style.display = "none";
+        tooltip.style.textAlign = "center";
+        tooltip.style.fontSize = "12px"; // Slightly larger font size
+        tooltip.style.lineHeight = "1.5"; // Improved line spacing
+        tooltip.innerHTML = tooltipContent;
+        placeholderContainer.appendChild(tooltip);
     }
 
     private startPlacingObject(objectType: string): void {
-        this.isPlacingObject = true;
-
         const objectConfig = this.objectManager.getObjectConfig(objectType);
         if (!objectConfig) return;
 
-        // Create a placeholder preview for the object
-        this.previewMesh = BABYLON.MeshBuilder.CreateBox(`preview_${objectType}`, { size: objectConfig.size }, this.scene);
-        this.previewMesh.material = new BABYLON.StandardMaterial("previewMat", this.scene);
-        (this.previewMesh.material as BABYLON.StandardMaterial).alpha = 0.5;
-        (this.previewMesh.material as BABYLON.StandardMaterial).diffuseColor = objectConfig.color;
-
-        this.previewMesh.position = new BABYLON.Vector3(0, 0, 0);
-
-        // Make the preview mesh non-pickable
-        this.previewMesh.isPickable = false;
-
-        // Create a range indicator for the turret
         if (objectType === "turret") {
-            this.rangeIndicator = BABYLON.MeshBuilder.CreateSphere("rangeIndicator", { diameter: 60, segments: 16 }, this.scene);
-            this.rangeIndicator.material = new BABYLON.StandardMaterial("rangeMat", this.scene);
-            (this.rangeIndicator.material as BABYLON.StandardMaterial).alpha = 0.2;
-            (this.rangeIndicator.material as BABYLON.StandardMaterial).diffuseColor = new BABYLON.Color3(1, 1, 1);
-            this.rangeIndicator.position = new BABYLON.Vector3(0, 0, 0);
-
-            // Make the range indicator non-pickable
-            this.rangeIndicator.isPickable = false;
+            const turretCost = 5; // Cost of a turret
+            if (this.game.getCoins() < turretCost) {
+                this.showTemporaryText("Pas assez de pièces!", 2000); // Show error message in French
+                return;
+            }
         }
 
-        const updateInterval = setInterval(() => {
-            if (this.isPlacingObject && this.previewMesh) {
-                const pickResult = this.scene.pick(this.scene.pointerX, this.scene.pointerY);
-                if (pickResult?.hit && pickResult.pickedMesh?.name === "Ground" && pickResult.pickedPoint) {
-                    this.previewMesh.position = new BABYLON.Vector3(
-                        pickResult.pickedPoint.x,
-                        pickResult.pickedPoint.y + 1,
-                        pickResult.pickedPoint.z
-                    );
+        this.isPlacingObject = true;
 
-                    if (this.rangeIndicator) {
-                        this.rangeIndicator.position = new BABYLON.Vector3(
-                            pickResult.pickedPoint.x,
-                            pickResult.pickedPoint.y + 1,
-                            pickResult.pickedPoint.z
-                        );
+        if (objectType === "turret") {
+            ModelLoader.loadModel(this.scene, "garden_tree_2", (result) => {
+                this.previewMesh = result.meshes[0] as BABYLON.Mesh;
+                this.previewMesh.name = `preview_${objectType}`; // Set the correct name
+                this.previewMesh.scaling = new BABYLON.Vector3(2, 2, 2); // Adjust scale as needed
+
+                // Configure material for transparency
+                const previewMaterial = new BABYLON.StandardMaterial("previewMat", this.scene);
+                previewMaterial.alpha = 0.3; // Set lower alpha for transparency
+                previewMaterial.transparencyMode = BABYLON.Material.MATERIAL_ALPHABLEND;
+                this.previewMesh.material = previewMaterial;
+
+                this.previewMesh.isPickable = false;
+
+                // Create a range indicator for the turret
+                this.rangeIndicator = BABYLON.MeshBuilder.CreateSphere("rangeIndicator", { diameter: 60, segments: 16 }, this.scene);
+                this.rangeIndicator.material = new BABYLON.StandardMaterial("rangeMat", this.scene);
+                (this.rangeIndicator.material as BABYLON.StandardMaterial).alpha = 0.2;
+                (this.rangeIndicator.material as BABYLON.StandardMaterial).diffuseColor = new BABYLON.Color3(1, 1, 1);
+                this.rangeIndicator.position = new BABYLON.Vector3(0, 0, 0);
+                this.rangeIndicator.isPickable = false;
+
+                const updateInterval = setInterval(() => {
+                    if (this.isPlacingObject && this.previewMesh) {
+                        const pickResult = this.scene.pick(this.scene.pointerX, this.scene.pointerY);
+                        if (pickResult?.hit && pickResult.pickedMesh?.name === "Ground" && pickResult.pickedPoint) {
+                            this.previewMesh.position = new BABYLON.Vector3(
+                                pickResult.pickedPoint.x,
+                                pickResult.pickedPoint.y + 1,
+                                pickResult.pickedPoint.z
+                            );
+
+                            if (this.rangeIndicator) {
+                                this.rangeIndicator.position = new BABYLON.Vector3(
+                                    pickResult.pickedPoint.x,
+                                    pickResult.pickedPoint.y + 1,
+                                    pickResult.pickedPoint.z
+                                );
+                            }
+                        }
+                    } else {
+                        clearInterval(updateInterval);
                     }
-                }
-            } else {
-                clearInterval(updateInterval);
-            }
-        }, 10);
+                }, 10);
+            });
+        } else {
+            // Logic for other object types
+        }
     }
 
     private setupMouseEvents(): void {
         this.scene.onPointerDown = (evt, pickResult) => {
+            if (evt.button === 2) { // Right-click to cancel placement
+                if (this.isPlacingObject && this.previewMesh) {
+                    const objectType = this.previewMesh.name.replace("preview_", ""); // Extract object type
+                    if (objectType === "turret") {
+                        const turretCost = 5; // Cost of a turret
+                        //this.game.increaseCoins(turretCost); // Refund the cost
+                    }
+
+                    // Dispose of the preview mesh and range indicator
+                    this.previewMesh.dispose();
+                    this.previewMesh = null;
+
+                    if (this.rangeIndicator) {
+                        this.rangeIndicator.dispose();
+                        this.rangeIndicator = null;
+                    }
+
+                    this.isPlacingObject = false;
+                    this.showTemporaryText("Placement annulé!", 2000); // Notifier l'annulation en français
+                }
+                return; // Prevent further processing for right-click
+            }
+
             if (!pickResult.pickedMesh) {
-                console.warn("Pointer down event did not hit any mesh.");
+                console.warn("L'événement de clic n'a touché aucun objet.");
                 return;
             }
 
@@ -103,8 +287,14 @@ export class UIManager {
             const isGround = pickResult.pickedMesh.name === "Ground";
 
             if (isGround && isPositionFree && this.previewMesh) {
-                const objectType = this.previewMesh.name.replace("preview_", "");
-                snappedPosition.y += 1; // Adjust the Y position to place the object above the ground
+                const objectType = this.previewMesh.name.replace("preview_", ""); // Extract object type
+                if (objectType === "turret") {
+                    const turretCost = 5; // Cost of a turret
+                    this.game.decreaseCoins(turretCost); // Deduct the cost when placed
+                }
+
+                snappedPosition.y += 0; // Adjust the Y position to place the object above the ground
+                console.log(`Création d'un objet de type : ${objectType} à la position : ${snappedPosition}`); // Journal en français
                 this.objectManager.createObject(objectType, snappedPosition);
 
                 // Dispose of the preview mesh and range indicator, and reset placement state
@@ -119,5 +309,172 @@ export class UIManager {
                 this.isPlacingObject = false;
             }
         };
+    }
+
+    public showTemporaryText(message: string, duration: number): void {
+        const textContainer = document.createElement("div");
+        textContainer.innerText = message;
+        textContainer.style.position = "absolute";
+        textContainer.style.top = "20px";
+        textContainer.style.left = "50%";
+        textContainer.style.transform = "translateX(-50%)";
+        textContainer.style.padding = "10px 20px";
+        textContainer.style.fontSize = "24px";
+        textContainer.style.color = "white";
+        textContainer.style.backgroundColor = "rgba(0, 0, 0, 0.7)";
+        textContainer.style.borderRadius = "5px";
+        textContainer.style.zIndex = "1000";
+        document.body.appendChild(textContainer);
+
+        setTimeout(() => {
+            document.body.removeChild(textContainer);
+        }, duration);
+    }
+
+    public showCinematicBars(): void {
+        // Create top bar
+        this.topBar = document.createElement("div");
+        this.topBar.style.position = "absolute";
+        this.topBar.style.top = "0";
+        this.topBar.style.left = "0";
+        this.topBar.style.width = "100%";
+        this.topBar.style.height = "10%";
+        this.topBar.style.backgroundColor = "rgba(0, 0, 0, 0.8)";
+        this.topBar.style.zIndex = "1000";
+        this.topBar.style.transition = "transform 0.5s ease-in-out";
+        this.topBar.style.transform = "translateY(-100%)"; // Initially hidden
+        document.body.appendChild(this.topBar);
+
+        // Create bottom bar
+        this.bottomBar = document.createElement("div");
+        this.bottomBar.style.position = "absolute";
+        this.bottomBar.style.bottom = "0";
+        this.bottomBar.style.left = "0";
+        this.bottomBar.style.width = "100%";
+        this.bottomBar.style.height = "10%";
+        this.bottomBar.style.backgroundColor = "rgba(0, 0, 0, 0.8)";
+        this.bottomBar.style.zIndex = "1000";
+        this.bottomBar.style.transition = "transform 0.5s ease-in-out";
+        this.bottomBar.style.transform = "translateY(100%)"; // Initially hidden
+        document.body.appendChild(this.bottomBar);
+
+        // Animate bars into view
+        setTimeout(() => {
+            this.topBar!.style.transform = "translateY(0)";
+            this.bottomBar!.style.transform = "translateY(0)";
+        }, 100);
+    }
+
+    public hideCinematicBars(): void {
+        if (this.topBar && this.bottomBar) {
+            // Animate bars out of view
+            this.topBar.style.transform = "translateY(-100%)";
+            this.bottomBar.style.transform = "translateY(100%)";
+
+            // Remove bars after animation
+            setTimeout(() => {
+                this.topBar?.remove();
+                this.bottomBar?.remove();
+                this.topBar = null;
+                this.bottomBar = null;
+            }, 500);
+        }
+    }
+
+    public addStartWaveButton(onStartWave: () => void): void {
+        const startWaveButton = document.createElement("button");
+        startWaveButton.innerText = "Démarrer la vague";
+        startWaveButton.style.position = "absolute";
+        startWaveButton.style.top = "50%";
+        startWaveButton.style.right = "20px";
+        startWaveButton.style.transform = "translateY(-50%)";
+        startWaveButton.style.padding = "10px 20px";
+        startWaveButton.style.fontSize = "16px";
+        startWaveButton.style.color = "white";
+        startWaveButton.style.backgroundColor = "green";
+        startWaveButton.style.border = "none";
+        startWaveButton.style.borderRadius = "5px";
+        startWaveButton.style.cursor = "pointer";
+        startWaveButton.style.zIndex = "1001"; // Above the cinematic bars
+        document.body.appendChild(startWaveButton);
+
+        startWaveButton.onclick = () => {
+            this.showTemporaryText("Vague commencée!", 2000); // Afficher le texte en français
+            this.hideCinematicBars(); // Hide cinematic bars
+            onStartWave(); // Trigger the wave start
+            startWaveButton.remove(); // Remove the button after starting the wave
+        };
+    }
+
+    public showPreparationPhase(onStartWave: () => void): void {
+        // Create a container for the UI
+        const uiContainer = document.createElement("div");
+        uiContainer.style.position = "absolute";
+        uiContainer.style.top = "0";
+        uiContainer.style.left = "0";
+        uiContainer.style.width = "100%";
+        uiContainer.style.height = "100%";
+        uiContainer.style.display = "flex";
+        uiContainer.style.flexDirection = "column";
+        uiContainer.style.justifyContent = "center";
+        uiContainer.style.alignItems = "center";
+        uiContainer.style.backgroundColor = "rgba(0, 0, 0, 0.5)";
+        uiContainer.style.zIndex = "1000";
+        document.body.appendChild(uiContainer);
+
+        // Add preparation phase text
+        const preparationText = document.createElement("div");
+        preparationText.innerText = "Phase de préparation...";
+        preparationText.style.color = "white";
+        preparationText.style.fontSize = "48px";
+        preparationText.style.marginBottom = "20px";
+        uiContainer.appendChild(preparationText);
+
+        // Wait for 3 seconds before showing the start button
+        setTimeout(() => {
+            preparationText.innerText = "Cliquez pour démarrer la vague";
+
+            // Add start button
+            const startButton = document.createElement("button");
+            startButton.innerText = "Démarrer la vague";
+            startButton.style.padding = "10px 20px";
+            startButton.style.fontSize = "24px";
+            startButton.style.color = "white";
+            startButton.style.backgroundColor = "green";
+            startButton.style.border = "none";
+            startButton.style.borderRadius = "5px";
+            startButton.style.cursor = "pointer";
+            uiContainer.appendChild(startButton);
+
+            startButton.onclick = () => {
+                // Remove preparation phase UI
+                document.body.removeChild(uiContainer);
+
+                // Show wave start animation
+                const waveStartContainer = document.createElement("div");
+                waveStartContainer.style.position = "absolute";
+                waveStartContainer.style.top = "0";
+                waveStartContainer.style.left = "0";
+                waveStartContainer.style.width = "100%";
+                waveStartContainer.style.height = "100%";
+                waveStartContainer.style.display = "flex";
+                waveStartContainer.style.justifyContent = "center";
+                waveStartContainer.style.alignItems = "center";
+                waveStartContainer.style.backgroundColor = "rgba(0, 0, 0, 0.5)";
+                waveStartContainer.style.zIndex = "1000";
+                document.body.appendChild(waveStartContainer);
+
+                const waveStartText = document.createElement("div");
+                waveStartText.innerText = "Vague commencée!";
+                waveStartText.style.color = "yellow";
+                waveStartText.style.fontSize = "48px";
+                waveStartContainer.appendChild(waveStartText);
+
+                setTimeout(() => {
+                    document.body.removeChild(waveStartContainer);
+                    onStartWave(); // Trigger the wave start
+                }, 2000); // Display "Wave Started!" for 2 seconds
+            };
+        }, 3000); // Display "Preparing Phase..." for 3 seconds
     }
 }

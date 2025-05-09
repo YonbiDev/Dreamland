@@ -26,22 +26,24 @@ export class WaveManager {
             console.warn(`No spawn positions found for ${spawnKey}.`);
             return;
         }
-       // let spawnPosition = spawnPositions[0].clone(); 
-       // enemies.push(new Viking(this.scene, spawnPosition, "1", "1"));
-       // spawnPosition = spawnPositions[0].clone(); 
-
-       // enemies.push(new Enemy(this.scene, "Slime_01_King", spawnPosition, 20, "1", "1"));
-       // spawnPosition = spawnPositions[0].clone(); 
- 
         
         for (let i = 0; i < enemyCount; i++) {
             setTimeout(() => {
                 const spawnPosition = spawnPositions[0].clone(); // Clone the position to ensure independence
-              
-                enemies.push(new Enemy(this.scene,"Slime_01_King", spawnPosition,10, "1", "1"));
-               // enemies.push(new Slime(this.scene, spawnPosition, "1", "1"));
+
+                // Add spawn effect using sprite sheet
+                const spriteManager = new BABYLON.SpriteManager("spawnEffectManager", "spawnEffectEnemy.png", 14, { width: 0, height: 0 }, this.scene);
+                const sprite = new BABYLON.Sprite("spawnEffect", spriteManager);
+                sprite.position = spawnPosition.clone();
+                sprite.playAnimation(0, 14, false, 50); // Play frames 0 to 15, non-looping, 100ms per frame
+                sprite.size = 5; // Adjust size as needed
+                sprite.disposeWhenFinishedAnimating = true; // Dispose after animation finishes
+                spriteManager.cellWidth = 896 / 14;
+                spriteManager.cellHeight = 69 / 1;
+                // Spawn the enemy
+                enemies.push(new Slime(this.scene, spawnPosition, "1", "1"));
                 console.log(`Enemy ${i + 1} spawned at ${spawnPosition}`);
-            }, i * 3000); // Delay of 500ms between each spawn
+            }, i * 3000); // Delay of 3000ms between each spawn
         }
 
         console.log(`Wave ${waveNumber} started with ${enemyCount} enemies.`);

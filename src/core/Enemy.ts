@@ -1,4 +1,4 @@
-import { deleteEnemey, getEnemies } from "../game";
+import { deleteEnemey, Game, getEnemies } from "../game";
 import { ModelLoader } from "./ModelLoader";
 
 export class Enemy {
@@ -26,12 +26,45 @@ export class Enemy {
             this.mesh.scaling.scaleInPlace(4); // Scale down the model
             this.mesh.metadata = this.mesh.metadata || {};
             this.mesh.metadata.enemyInstance = this;
-            
+
+            // Add particle system for walking effect
+            this.addWalkingParticleEffect();
+
             this.moveToNextWaypoint();
         });
 
         // Start the update loop for this enemy
         this.updateInterval = window.setInterval(() => this.update(16), 16); // ~60 FPS
+    }
+
+    private addWalkingParticleEffect(): void {
+        const particleSystem = new BABYLON.ParticleSystem("walkingParticles", 2000, this.scene);
+        particleSystem.particleTexture = new BABYLON.Texture("particles/17.png", this.scene); // Use 17.png texture
+        particleSystem.emitter = this.mesh; // Attach to the enemy mesh
+        particleSystem.minEmitBox = new BABYLON.Vector3(-0.2, 0, -0.2); // Emit from a slightly larger area
+        particleSystem.maxEmitBox = new BABYLON.Vector3(0.2, 0, 0.2);
+
+        // Set white colors for cloudy effect
+        particleSystem.color1 = new BABYLON.Color4(1, 1, 1, 0.8); // White
+        particleSystem.color2 = new BABYLON.Color4(1, 1, 1, 0.8); // White
+        particleSystem.colorDead = new BABYLON.Color4(1, 1, 1, 0.3); // Fading white
+
+        particleSystem.minSize = 0.5; // Larger particles for a cloudy effect
+        particleSystem.maxSize = 1.0;
+        particleSystem.minLifeTime = 0.5;
+        particleSystem.maxLifeTime = 1.0;
+        particleSystem.emitRate = 150;
+
+        particleSystem.blendMode = BABYLON.ParticleSystem.BLENDMODE_ADD; // Use additive blending to remove black edges
+        particleSystem.gravity = new BABYLON.Vector3(0, -0.5, 0); // Slight downward motion
+        particleSystem.direction1 = new BABYLON.Vector3(-0.2, 0.5, -0.2);
+        particleSystem.direction2 = new BABYLON.Vector3(0.2, 0.5, 0.2);
+
+        particleSystem.minEmitPower = 0.5;
+        particleSystem.maxEmitPower = 1.0;
+        particleSystem.updateSpeed = 0.02;
+
+        particleSystem.start(); // Start the particle system
     }
 
     private static getRandomSpawnPoint(level: number, spawnPositionNumber: number): BABYLON.Vector3 | null {
@@ -168,8 +201,12 @@ export class Enemy {
             const moveVector = adjustedDirection.scale(adjustedSpeed);
             this.mesh.moveWithCollisions(moveVector);
 
-            // Continuously make the enemy face the waypoint
-
+            // Smoothly rotate the enemy to face the correct waypoint
+            const targetDirection = target.subtract(this.mesh.position).normalize();
+            const targetYaw = Math.atan2(targetDirection.x, targetDirection.z); // Correct yaw calculation
+            const currentRotation = this.mesh.rotationQuaternion || BABYLON.Quaternion.Identity();
+            const targetRotation = BABYLON.Quaternion.RotationYawPitchRoll(targetYaw, 0, 0);
+            this.mesh.rotationQuaternion = BABYLON.Quaternion.Slerp(currentRotation, targetRotation, 0.1); // Adjust 0.1 for smoother or faster rotation
 
             if (distance < 0.5) { // Adjust threshold for reaching the waypoint
                 // Reached the waypoint
@@ -188,7 +225,6 @@ export class Enemy {
 
     update(deltaTime: number) {
         if (!this.mesh) {
-            console.warn("Enemy mesh is not yet loaded.");
             return;
         }
 
@@ -234,8 +270,18 @@ export class Enemy {
 
 export class Slime extends Enemy {
     constructor(scene: BABYLON.Scene, position: BABYLON.Vector3, level: string, spawnLabel: string) {
-        super(scene, "Slime_01_MeltalHelmet", position, 10, level, spawnLabel); // Slime has 10 HP by default
+        super(scene, "Slime_03", position, 10, level, spawnLabel); // Slime has 10 HP by default
         this.speed = 5; // Slime-specific speed
+
+    }
+}
+
+
+export class Knight extends Enemy {
+    constructor(scene: BABYLON.Scene, position: BABYLON.Vector3, level: string, spawnLabel: string) {
+        super(scene, "Slime_01_MeltalHelmet", position, 20, level, spawnLabel); // Viking has 20 HP by default
+        this.speed = 5; // Viking-specific speed
+
 
     }
 }
@@ -246,10 +292,18 @@ export class Viking extends Enemy {
         this.speed = 10; // Viking-specific speed
 
     }
+    
 
     // Override moveToNextWaypoint to add Viking-specific behavior
     protected moveToNextWaypoint(): void {
         console.log("Viking is charging towards the next waypoint!");
         super.moveToNextWaypoint();
+    }
+}
+export class Attacker extends Enemy {
+    constructor(scene: BABYLON.Scene, position: BABYLON.Vector3, level: string, spawnLabel: string) {
+        super(scene, "Slime_03 Leaf", position, 20, level, spawnLabel); // Viking has 20 HP by default
+        this.speed = 10; // Viking-specific speed
+
     }
 }

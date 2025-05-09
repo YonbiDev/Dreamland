@@ -21,7 +21,7 @@ export class ObjectManager {
         if (objectType === "turret") {
             import("./Turret").then(module => {
                 const Turret = module.Turret;
-                new Turret(this.scene, position, 30,100); // Default range is 100
+                new Turret(this.scene, position, 30,50,2000); // Default range is 100
             });
         } else {
             const object = BABYLON.MeshBuilder.CreateBox(objectType, { size: objectConfig.size }, this.scene);

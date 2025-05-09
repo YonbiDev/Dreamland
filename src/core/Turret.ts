@@ -1,24 +1,35 @@
 import { enemies } from "./GlobalState";
 import { Projectile } from "./Projectile";
+import { ModelLoader } from "./ModelLoader";
 
 export class Turret {
     mesh: BABYLON.Mesh;
-    range: number;
+    range: number; 
     scene: BABYLON.Scene;
     target: BABYLON.Mesh | null = null;
-    fireRate: number = 1000;
+    fireRate: number;// Time in milliseconds between shots
     lastShotTime: number = 0;
     projectileSpeed: number; // Speed of the projectiles fired by this turret
 
-    constructor(scene: BABYLON.Scene, position: BABYLON.Vector3, range: number = 10, projectileSpeed: number = 20) {
+    constructor(scene: BABYLON.Scene, position: BABYLON.Vector3, range: number = 10, projectileSpeed: number = 20,fireRate: number = 1000) {
         this.scene = scene;
         this.range = range;
         this.projectileSpeed = projectileSpeed; // Initialize projectile speed
+        this.fireRate = fireRate; // Initialize fire rate
 
-        this.mesh = BABYLON.MeshBuilder.CreateBox("turret", { size: 3 }, scene);
-        this.mesh.position = position;
-        this.mesh.material = new BABYLON.StandardMaterial("turretMat", scene);
-        (this.mesh.material as BABYLON.StandardMaterial).diffuseColor = BABYLON.Color3.Blue();
+        ModelLoader.loadModel(scene, "garden_tree_2", (result) => {
+            this.mesh = result.meshes[0] as BABYLON.Mesh;
+            this.mesh.position = position;
+            this.mesh.scaling = new BABYLON.Vector3(2, 2, 2); // Adjust scale as needed
+
+            // Add sprite sheet animation
+           // const spriteManager = new BABYLON.SpriteManager("spriteManager", "pipo-mapeffect013a.png", 1, { width: 400, height: 400 }, this.scene);
+         /*   const sprite = new BABYLON.Sprite("effect", spriteManager);
+            sprite.position = new BABYLON.Vector3(position.x, position.y+3, position.z); // Position below the turret
+            sprite.playAnimation(0, 9, true, 100); // Play frames 0 to 15 in a loop with 100ms per frame
+            sprite.size = 20; // Adjust size as needed 
+        */
+        });
 
         // Vérifier les ennemis toutes les 500ms
         setInterval(() => {
