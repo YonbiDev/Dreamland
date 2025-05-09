@@ -71,7 +71,7 @@ export class UIManager {
         // Add coin display container
         const coinContainer = document.createElement("div");
         coinContainer.style.position = "absolute";
-        coinContainer.style.top = "10px";
+        coinContainer.style.top = "12%"; // Ensure it is below the black bar
         coinContainer.style.left = "10px";
         coinContainer.style.display = "flex";
         coinContainer.style.alignItems = "center";
@@ -81,6 +81,7 @@ export class UIManager {
         coinContainer.style.backgroundColor = "rgba(0, 0, 0, 0.7)";
         coinContainer.style.borderRadius = "5px";
         coinContainer.style.zIndex = "1001";
+        coinContainer.style.marginBottom = "15px"; // Add spacing from the health display
 
         // Add coin image
         const coinImage = document.createElement("img");
@@ -101,7 +102,7 @@ export class UIManager {
         // Add health display container
         const healthContainer = document.createElement("div");
         healthContainer.style.position = "absolute";
-        healthContainer.style.top = "40px";
+        healthContainer.style.top = "calc(12% + 50px)"; // Ensure it is below the coin display
         healthContainer.style.left = "10px";
         healthContainer.style.display = "flex";
         healthContainer.style.alignItems = "center";
@@ -112,14 +113,40 @@ export class UIManager {
         healthContainer.style.borderRadius = "5px";
         healthContainer.style.zIndex = "1001";
 
+        // Add heart image
+        const heartImage = document.createElement("img");
+        heartImage.src = "UI_Heart.png"; // Path to the heart image
+        heartImage.alt = "Heart";
+        heartImage.style.width = "20px";
+        heartImage.style.height = "20px";
+        heartImage.style.marginRight = "8px"; // Add spacing between the image and text
+        healthContainer.appendChild(heartImage);
+
         // Add health text
         this.healthDisplay = document.createElement("div");
         this.healthDisplay.innerText = `Santé: 10`; // Initial health
         healthContainer.appendChild(this.healthDisplay);
 
         document.body.appendChild(healthContainer);
-    }
 
+        
+        // Add mouse trail effect
+        this.addMouseTrailEffect();
+    }
+private addMouseTrailEffect(): void {
+        const trailMaterial = new BABYLON.StandardMaterial("trailMaterial", this.scene);
+        trailMaterial.emissiveColor = new BABYLON.Color3(1, 0, 0); // Red color for the trail
+
+        const trailMesh = BABYLON.MeshBuilder.CreateSphere("trail", { diameter: 0.5 }, this.scene);
+        trailMesh.material = trailMaterial;
+        trailMesh.isPickable = false;
+
+        this.scene.onPointerMove = (evt, pickResult) => {
+            if (pickResult?.hit && pickResult.pickedPoint) {
+                trailMesh.position = pickResult.pickedPoint;
+            }
+        };
+    }
     public updateCoinDisplay(): void {
         if (this.coinDisplay) {
             this.coinDisplay.innerText = `Éclats de Rêves: ${this.game.getCoins()}`;
@@ -315,7 +342,7 @@ export class UIManager {
         const textContainer = document.createElement("div");
         textContainer.innerText = message;
         textContainer.style.position = "absolute";
-        textContainer.style.top = "20px";
+        textContainer.style.top = "100px";
         textContainer.style.left = "50%";
         textContainer.style.transform = "translateX(-50%)";
         textContainer.style.padding = "10px 20px";
@@ -407,6 +434,9 @@ export class UIManager {
     }
 
     public showPreparationPhase(onStartWave: () => void): void {
+        // Show cinematic bars during preparation phase
+        this.showCinematicBars();
+
         // Create a container for the UI
         const uiContainer = document.createElement("div");
         uiContainer.style.position = "absolute";
@@ -430,51 +460,47 @@ export class UIManager {
         preparationText.style.marginBottom = "20px";
         uiContainer.appendChild(preparationText);
 
-        // Wait for 3 seconds before showing the start button
-        setTimeout(() => {
-            preparationText.innerText = "Cliquez pour démarrer la vague";
+        // Add start button immediately
+        const startButton = document.createElement("button");
+        startButton.innerText = "Démarrer la vague";
+        startButton.style.padding = "10px 20px";
+        startButton.style.fontSize = "24px";
+        startButton.style.color = "white";
+        startButton.style.backgroundColor = "green";
+        startButton.style.border = "none";
+        startButton.style.borderRadius = "5px";
+        startButton.style.cursor = "pointer";
+        uiContainer.appendChild(startButton);
 
-            // Add start button
-            const startButton = document.createElement("button");
-            startButton.innerText = "Démarrer la vague";
-            startButton.style.padding = "10px 20px";
-            startButton.style.fontSize = "24px";
-            startButton.style.color = "white";
-            startButton.style.backgroundColor = "green";
-            startButton.style.border = "none";
-            startButton.style.borderRadius = "5px";
-            startButton.style.cursor = "pointer";
-            uiContainer.appendChild(startButton);
+        startButton.onclick = () => {
+            // Remove preparation phase UI
+            document.body.removeChild(uiContainer);
 
-            startButton.onclick = () => {
-                // Remove preparation phase UI
-                document.body.removeChild(uiContainer);
+            // Show wave start animation
+            const waveStartContainer = document.createElement("div");
+            waveStartContainer.style.position = "absolute";
+            waveStartContainer.style.top = "0";
+            waveStartContainer.style.left = "0";
+            waveStartContainer.style.width = "100%";
+            waveStartContainer.style.height = "100%";
+            waveStartContainer.style.display = "flex";
+            waveStartContainer.style.justifyContent = "center";
+            waveStartContainer.style.alignItems = "center";
+            waveStartContainer.style.backgroundColor = "rgba(0, 0, 0, 0.5)";
+            waveStartContainer.style.zIndex = "1000";
+            document.body.appendChild(waveStartContainer);
 
-                // Show wave start animation
-                const waveStartContainer = document.createElement("div");
-                waveStartContainer.style.position = "absolute";
-                waveStartContainer.style.top = "0";
-                waveStartContainer.style.left = "0";
-                waveStartContainer.style.width = "100%";
-                waveStartContainer.style.height = "100%";
-                waveStartContainer.style.display = "flex";
-                waveStartContainer.style.justifyContent = "center";
-                waveStartContainer.style.alignItems = "center";
-                waveStartContainer.style.backgroundColor = "rgba(0, 0, 0, 0.5)";
-                waveStartContainer.style.zIndex = "1000";
-                document.body.appendChild(waveStartContainer);
+            const waveStartText = document.createElement("div");
+            waveStartText.innerText = "Vague commencée!";
+            waveStartText.style.color = "yellow";
+            waveStartText.style.fontSize = "48px";
+            waveStartContainer.appendChild(waveStartText);
 
-                const waveStartText = document.createElement("div");
-                waveStartText.innerText = "Vague commencée!";
-                waveStartText.style.color = "yellow";
-                waveStartText.style.fontSize = "48px";
-                waveStartContainer.appendChild(waveStartText);
-
-                setTimeout(() => {
-                    document.body.removeChild(waveStartContainer);
-                    onStartWave(); // Trigger the wave start
-                }, 2000); // Display "Wave Started!" for 2 seconds
-            };
-        }, 3000); // Display "Preparing Phase..." for 3 seconds
+            setTimeout(() => {
+                document.body.removeChild(waveStartContainer);
+                this.hideCinematicBars(); // Hide cinematic bars after wave starts
+                onStartWave(); // Trigger the wave start
+            }, 2000); // Display "Wave Started!" for 2 seconds
+        };
     }
 }

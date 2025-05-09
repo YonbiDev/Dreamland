@@ -13,13 +13,17 @@ export class MenuManager {
         menuContainer.style.alignItems = "center";
         menuContainer.style.backgroundImage = "url('mainmenuImage.png')"; // Add background image
         menuContainer.style.backgroundSize = "cover";
-        menuContainer.style.backgroundPosition = "center";
+                menuContainer.style.backgroundRepeat = "no-repeat";
+
+        menuContainer.style.backgroundPosition = "up";
+
         menuContainer.style.zIndex = "1000";
+
         menuContainer.style.overflow = "hidden"; // Prevent overflow for mouse effects
 
         // Add title
         const title = document.createElement("h1");
-        title.innerText = "Sélection de Niveau";
+        title.innerText = "Defenders of Dreamfall";
         title.style.color = "white";
         title.style.marginBottom = "20px";
         title.style.fontSize = "48px";
@@ -29,8 +33,8 @@ export class MenuManager {
         // Add level buttons
         const levels = [
             { id: "level1", name: "Niveau 1" },
-            { id: "level2", name: "Niveau 2 (Coming Soon)" },
-            { id: "level3", name: "Niveau 3 (Coming Soon)" }
+            { id: "level2", name: "Niveau 2 (Bientôt)" },
+            { id: "level3", name: "Niveau 3 (Bientôt)" }
         ];
 
         levels.forEach(level => {

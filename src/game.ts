@@ -33,6 +33,13 @@ export class Game {
         // Display initial coins
         this.uiManager.showTemporaryText(`Vous avez ${this.coins} éclats de rêves!`, 3000);
 
+        // Show cinematic bars and add start wave button
+        this.uiManager.showCinematicBars();
+        this.uiManager.addStartWaveButton(() => {
+            waveManager.startWave(1, "level1_spawnpoint1", 5); // Example wave start
+        });
+
+
         // Load the "LandMass" model
         ModelLoader.loadModel(this.scene, "LandMass", result => {
             //console.log("LandMass model loaded:", result.meshes);
@@ -86,6 +93,8 @@ export class Game {
             this.scene.render();
         });
     }
+
+    
 
     public getCoins(): number {
         return this.coins;
