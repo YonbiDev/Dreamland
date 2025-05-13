@@ -4,6 +4,18 @@ import { Game } from "../game";
 import { int } from "babylonjs";
 
 export class UIManager {
+    private static instance: UIManager | null = null;
+
+    public static getInstance(scene?: BABYLON.Scene, canvas?: HTMLCanvasElement, game?: Game): UIManager {
+        if (!UIManager.instance) {
+            if (!scene || !canvas || !game) {
+                throw new Error("UIManager has not been initialized. Please provide scene, canvas, and game arguments.");
+            }
+            UIManager.instance = new UIManager(scene, canvas, game);
+        }
+        return UIManager.instance;
+    }
+
     private scene: BABYLON.Scene;
     private canvas: HTMLCanvasElement;
     private isPlacingObject: boolean = false;
@@ -17,6 +29,7 @@ export class UIManager {
     private coinDisplay: HTMLDivElement | null = null;
     private healthDisplay: HTMLDivElement | null = null;
     private game: Game;
+    private startWaveButton: HTMLButtonElement | null = null;
 
     constructor(scene: BABYLON.Scene, canvas: HTMLCanvasElement, game: Game) {
         this.scene = scene;
@@ -136,25 +149,56 @@ export class UIManager {
 
 
             this.canvas.addEventListener("enemyReachedEnd", this.enemyReachedEnd.bind(this));
+
+            
     }
 
     private enemyReachedEnd(event: Event): void {
    this.decreaseHealth(1);
 }
 private addMouseTrailEffect(): void {
-        const trailMaterial = new BABYLON.StandardMaterial("trailMaterial", this.scene);
-        trailMaterial.emissiveColor = new BABYLON.Color3(1, 0, 0); // Red color for the trail
+    const trailMeshes: BABYLON.Mesh[] = [];
+    const trailMaterial = new BABYLON.StandardMaterial("trailMaterial", this.scene);
+    trailMaterial.emissiveColor = new BABYLON.Color3(1, 0, 0); // Bright red color for visibility
+    trailMaterial.alpha = 0.8; // Slight transparency for better effect
 
-        const trailMesh = BABYLON.MeshBuilder.CreateSphere("trail", { diameter: 0.5 }, this.scene);
+    const createTrailMesh = (position: BABYLON.Vector3) => {
+        const trailMesh = BABYLON.MeshBuilder.CreateSphere("trail", { diameter: 0.5 }, this.scene); // Increased size for visibility
         trailMesh.material = trailMaterial;
+        trailMesh.position = position.clone();
         trailMesh.isPickable = false;
+        trailMesh.renderingGroupId = 2; // Ensure it renders above other elements
+        trailMeshes.push(trailMesh);
 
-        this.scene.onPointerMove = (evt, pickResult) => {
-            if (pickResult?.hit && pickResult.pickedPoint) {
-                trailMesh.position = pickResult.pickedPoint;
+        // Fade out and dispose of the trail mesh over time
+        setTimeout(() => {
+            trailMesh.dispose();
+            const index = trailMeshes.indexOf(trailMesh);
+            if (index > -1) {
+                trailMeshes.splice(index, 1);
             }
-        };
-    }
+        }, 500); // Adjust the duration as needed
+    };
+
+    this.scene.onPointerMove = (evt, pickResult) => {
+        if (pickResult?.hit && pickResult.pickedPoint) {
+            createTrailMesh(pickResult.pickedPoint);
+        }
+    };
+
+    // Add the trail effect to the render loop
+    this.scene.onBeforeRenderObservable.add(() => {
+        // Ensure the trail effect is updated in real-time
+        if (trailMeshes.length > 0) {
+            trailMeshes.forEach((mesh) => {
+                mesh.visibility -= 0.02; // Gradually fade out the trail
+                if (mesh.visibility <= 0) {
+                    mesh.dispose();
+                }
+            });
+        }
+    });
+}
     public updateCoinDisplay(): void {
         if (this.coinDisplay) {
             this.coinDisplay.innerText = `Éclats de Rêves: ${this.game.getCoins()}`;
@@ -168,6 +212,7 @@ private addMouseTrailEffect(): void {
         if (Game.health <= 0) {
             this.showGameOverMenu();
         }
+      
     }
 
     public decreaseHealth(amount: number): void {
@@ -210,6 +255,48 @@ private addMouseTrailEffect(): void {
         mainMenuButton.style.borderRadius = "5px";
         mainMenuButton.style.cursor = "pointer";
         gameOverContainer.appendChild(mainMenuButton);
+
+        mainMenuButton.onclick = () => {
+            // Logic to navigate to the main menu
+            window.location.reload(); // Example: Reload the page to simulate returning to the main menu
+        };
+    }
+
+    public showVictoryMenu(): void {
+        // Create victory container
+        const victoryContainer = document.createElement("div");
+        victoryContainer.style.position = "absolute";
+        victoryContainer.style.top = "0";
+        victoryContainer.style.left = "0";
+        victoryContainer.style.width = "100%";
+        victoryContainer.style.height = "100%";
+        victoryContainer.style.display = "flex";
+        victoryContainer.style.flexDirection = "column";
+        victoryContainer.style.justifyContent = "center";
+        victoryContainer.style.alignItems = "center";
+        victoryContainer.style.backgroundColor = "rgba(0, 0, 0, 0.8)";
+        victoryContainer.style.zIndex = "1000";
+        document.body.appendChild(victoryContainer);
+
+        // Add "Victory" text
+        const victoryText = document.createElement("div");
+        victoryText.innerText = "Victoire!";
+        victoryText.style.color = "gold";
+        victoryText.style.fontSize = "48px";
+        victoryText.style.marginBottom = "20px";
+        victoryContainer.appendChild(victoryText);
+
+        // Add button to return to main menu
+        const mainMenuButton = document.createElement("button");
+        mainMenuButton.innerText = "Retour au menu principal";
+        mainMenuButton.style.padding = "10px 20px";
+        mainMenuButton.style.fontSize = "24px";
+        mainMenuButton.style.color = "white";
+        mainMenuButton.style.backgroundColor = "blue";
+        mainMenuButton.style.border = "none";
+        mainMenuButton.style.borderRadius = "5px";
+        mainMenuButton.style.cursor = "pointer";
+        victoryContainer.appendChild(mainMenuButton);
 
         mainMenuButton.onclick = () => {
             // Logic to navigate to the main menu
@@ -467,28 +554,40 @@ private addMouseTrailEffect(): void {
     }
 
     public addStartWaveButton(onStartWave: () => void): void {
-        const startWaveButton = document.createElement("button");
-        startWaveButton.innerText = "Démarrer la vague";
-    startWaveButton.style.position = "absolute";
-    startWaveButton.style.top = "calc(12% + 110px)"; // 50px du heart + ~60px de marge
-    startWaveButton.style.left = "10px";
-    startWaveButton.style.display = "flex"
-        startWaveButton.style.padding = "10px 20px";
-        startWaveButton.style.fontSize = "16px";
-        startWaveButton.style.color = "white";
-        startWaveButton.style.backgroundColor = "green";
-        startWaveButton.style.border = "none";
-        startWaveButton.style.borderRadius = "5px";
-        startWaveButton.style.cursor = "pointer";
-        startWaveButton.style.zIndex = "1001"; // Above the cinematic bars
-        document.body.appendChild(startWaveButton);
+        this.startWaveButton = document.createElement("button");
+        this.startWaveButton.innerText = "Démarrer la vague";
+        this.startWaveButton.style.position = "absolute";
+        this.startWaveButton.style.top = "calc(12% + 110px)"; // 50px du heart + ~60px de marge
+        this.startWaveButton.style.left = "10px";
+        this.startWaveButton.style.display = "flex";
+        this.startWaveButton.style.padding = "10px 20px";
+        this.startWaveButton.style.fontSize = "16px";
+        this.startWaveButton.style.color = "white";
+        this.startWaveButton.style.backgroundColor = "green";
+        this.startWaveButton.style.border = "none";
+        this.startWaveButton.style.borderRadius = "5px";
+        this.startWaveButton.style.cursor = "pointer";
+        this.startWaveButton.style.zIndex = "1001"; // Above the cinematic bars
+        document.body.appendChild(this.startWaveButton);
 
-        startWaveButton.onclick = () => {
+        this.startWaveButton.onclick = () => {
             this.showTemporaryText("Vague commencée!", 2000); // Afficher le texte en français
             this.hideCinematicBars(); // Hide cinematic bars
             onStartWave(); // Trigger the wave start
-            startWaveButton.remove(); // Remove the button after starting the wave
+            this.hideStartWaveButton(); // Hide the button instead of removing it
         };
+    }
+
+    public showStartWaveButton(): void {
+        if (this.startWaveButton) {
+            this.startWaveButton.style.display = "flex";
+        }
+    }
+
+    public hideStartWaveButton(): void {
+        if (this.startWaveButton) {
+            this.startWaveButton.style.display = "none";
+        }
     }
 
     public showPreparationPhase(onStartWave: () => void): void {

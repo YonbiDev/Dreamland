@@ -1,5 +1,6 @@
 import { deleteEnemey, Game, getEnemies } from "../game";
 import { ModelLoader } from "./ModelLoader";
+import { WaveManager } from "./WaveManager";
 
 export class Enemy {
     mesh: BABYLON.Mesh;
@@ -264,6 +265,7 @@ export class Enemy {
         clearInterval(this.updateInterval);
         deleteEnemey(this);
         this.mesh.dispose();
+        WaveManager.getInstance().isWaveComplete();
         console.log("enemy supprimer de la liste");
     }
 }
@@ -296,7 +298,7 @@ export class Viking extends Enemy {
 
     // Override moveToNextWaypoint to add Viking-specific behavior
     protected moveToNextWaypoint(): void {
-        console.log("Viking is charging towards the next waypoint!");
+        //console.log("Viking is charging towards the next waypoint!");
         super.moveToNextWaypoint();
     }
 }

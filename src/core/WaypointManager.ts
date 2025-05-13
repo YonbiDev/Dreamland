@@ -50,4 +50,6 @@ export class WaypointManager {
         console.log(`Spawn positions loaded for ${key}:`, spawnPositions);
         return spawnPositions;
     }
+
+    
 }

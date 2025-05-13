@@ -1,5 +1,5 @@
 export class MenuManager {
-    public showMainMenu(onLevelSelect: (level: string) => void): void {
+    public async showMainMenu(onLevelSelect: (level: string) => void): Promise<void> {
         // Create a container for the menu
         const menuContainer = document.createElement("div");
         menuContainer.style.position = "absolute";
@@ -11,15 +11,34 @@ export class MenuManager {
         menuContainer.style.flexDirection = "column";
         menuContainer.style.justifyContent = "center";
         menuContainer.style.alignItems = "center";
-        menuContainer.style.backgroundImage = "url('mainmenuImage.png')"; // Add background image
-        menuContainer.style.backgroundSize = "cover";
-                menuContainer.style.backgroundRepeat = "no-repeat";
-
-        menuContainer.style.backgroundPosition = "up";
-
         menuContainer.style.zIndex = "1000";
-
         menuContainer.style.overflow = "hidden"; // Prevent overflow for mouse effects
+
+        // Add background video
+        const backgroundVideo = document.createElement("video");
+        backgroundVideo.src = "mainmenu_video.mp4";
+        backgroundVideo.autoplay = true;
+        backgroundVideo.loop = true;
+        backgroundVideo.muted = true;
+        backgroundVideo.style.position = "absolute";
+        backgroundVideo.style.top = "0";
+        backgroundVideo.style.left = "0";
+        backgroundVideo.style.width = "100%";
+        backgroundVideo.style.height = "100%";
+        backgroundVideo.style.objectFit = "cover";
+        backgroundVideo.style.zIndex = "-1"; // Ensure it stays behind other elements
+        menuContainer.appendChild(backgroundVideo);
+
+        // Add background music
+        const audioEngine = await BABYLON.CreateAudioEngineAsync();
+
+        const backgroundMusic = await BABYLON.CreateSoundAsync("backgroundMusic", 
+            "mainmenu_music.mp3"
+        );
+       await audioEngine.unlock();
+
+        backgroundMusic.play();
+
 
         // Add title
         const title = document.createElement("h1");
@@ -66,6 +85,8 @@ export class MenuManager {
             button.onclick = () => {
                 if (level.id === "level1") {
                     document.body.removeChild(menuContainer);
+                            backgroundMusic.stop();
+
                     onLevelSelect(level.id);
                 }
             };
@@ -84,49 +105,47 @@ export class MenuManager {
         mouseEffect.style.transition = "transform 0.1s, opacity 0.1s";
         menuContainer.appendChild(mouseEffect);
 
-        
-
         menuContainer.onmouseleave = () => {
             mouseEffect.style.opacity = "0";
         };
 
-    menuContainer.onmousemove = (event) => {
-    // Update main cursor effect
-    const size = 20;
-    mouseEffect.style.left = `${event.clientX - size / 2}px`;
-    mouseEffect.style.top = `${event.clientY - size / 2}px`;
-    mouseEffect.style.opacity = "1";
+        menuContainer.onmousemove = (event) => {
+            // Update main cursor effect
+            const size = 20;
+            mouseEffect.style.left = `${event.clientX - size / 2}px`;
+            mouseEffect.style.top = `${event.clientY - size / 2}px`;
+            mouseEffect.style.opacity = "1";
 
-    // Create a particle
-    const particle = document.createElement("div");
-    const particleSize = Math.random() * 6 + 4; // 4px to 10px
-    particle.style.position = "absolute";
-    particle.style.left = `${event.clientX - particleSize / 2}px`;
-    particle.style.top = `${event.clientY - particleSize / 2}px`;
-    particle.style.width = `${particleSize}px`;
-    particle.style.height = `${particleSize}px`;
-    particle.style.borderRadius = "50%";
-    particle.style.backgroundColor = `rgba(255, 255, 255, ${Math.random() * 0.8 + 0.2})`;
-    particle.style.pointerEvents = "none";
-    particle.style.zIndex = "1001";
-    particle.style.opacity = "1";
-    particle.style.transition = "all 0.5s ease-out";
+            // Create a particle
+            const particle = document.createElement("div");
+            const particleSize = Math.random() * 6 + 4; // 4px to 10px
+            particle.style.position = "absolute";
+            particle.style.left = `${event.clientX - particleSize / 2}px`;
+            particle.style.top = `${event.clientY - particleSize / 2}px`;
+            particle.style.width = `${particleSize}px`;
+            particle.style.height = `${particleSize}px`;
+            particle.style.borderRadius = "50%";
+            particle.style.backgroundColor = `rgba(255, 255, 255, ${Math.random() * 0.8 + 0.2})`;
+            particle.style.pointerEvents = "none";
+            particle.style.zIndex = "1001";
+            particle.style.opacity = "1";
+            particle.style.transition = "all 0.5s ease-out";
 
-    // Slight movement (optional)
-    const offsetX = (Math.random() - 0.5) * 30;
-    const offsetY = (Math.random() - 0.5) * 30;
-    requestAnimationFrame(() => {
-        particle.style.transform = `translate(${offsetX}px, ${offsetY}px)`;
-        particle.style.opacity = "0";
-    });
+            // Slight movement (optional)
+            const offsetX = (Math.random() - 0.5) * 30;
+            const offsetY = (Math.random() - 0.5) * 30;
+            requestAnimationFrame(() => {
+                particle.style.transform = `translate(${offsetX}px, ${offsetY}px)`;
+                particle.style.opacity = "0";
+            });
 
-    menuContainer.appendChild(particle);
+            menuContainer.appendChild(particle);
 
-    // Remove after fade
-    setTimeout(() => {
-        menuContainer.removeChild(particle);
-    }, 500);
-};
+            // Remove after fade
+            setTimeout(() => {
+                menuContainer.removeChild(particle);
+            }, 500);
+        };
         document.body.appendChild(menuContainer);
     }
 

@@ -33,25 +33,84 @@ export class Projectile {
                 scene
             );
 
+            this.addParticleEffect(); // Ajouter les particules au projectile
             this.moveToTarget();
         });
+    }
+
+    private addParticleEffect() {
+        const particleSystem = new BABYLON.ParticleSystem("projectileTrail", 200, this.scene);
+        particleSystem.particleTexture = new BABYLON.Texture("textures/flare.png", this.scene);
+        particleSystem.emitter = this.mesh; // Émettre depuis le projectile
+        particleSystem.minEmitBox = new BABYLON.Vector3(-0.1, -0.1, -0.1); // Zone d'émission minimale
+        particleSystem.maxEmitBox = new BABYLON.Vector3(0.1, 0.1, 0.1); // Zone d'émission maximale
+
+        particleSystem.color1 = new BABYLON.Color4(1, 1, 0, 1); // Jaune
+        particleSystem.color2 = new BABYLON.Color4(1, 0.5, 0, 1); // Orange
+        particleSystem.minSize = 0.1;
+        particleSystem.maxSize = 0.3;
+        particleSystem.minLifeTime = 0.2;
+        particleSystem.maxLifeTime = 0.5;
+        particleSystem.emitRate = 100;
+        particleSystem.blendMode = BABYLON.ParticleSystem.BLENDMODE_ONEONE;
+        particleSystem.gravity = new BABYLON.Vector3(0, 0, 0); // Pas de gravité pour les particules
+        particleSystem.direction1 = new BABYLON.Vector3(-0.5, -0.5, -0.5);
+        particleSystem.direction2 = new BABYLON.Vector3(0.5, 0.5, 0.5);
+        particleSystem.minEmitPower = 1;
+        particleSystem.maxEmitPower = 2;
+        particleSystem.updateSpeed = 0.01;
+
+        particleSystem.start();
+
+        // Stocker le système de particules pour le supprimer plus tard
+        this.mesh.metadata = { ...this.mesh.metadata, particleSystem };
     }
 
     moveToTarget() {
         if (!this.targetMesh) return;
 
+        let randomPhase = true; // Phase initiale d'étoile filante
+        const randomDuration = 1000; // Durée en ms pour le mouvement initial
+        const startTime = Date.now();
+        let zigzagDirection = 1; // Direction du zigzag (1 ou -1)
+
         this.scene.onBeforeRenderObservable.add(() => {
-            if (!this.targetMesh || !this.mesh || !this.mesh.physicsImpostor) return;
+            if (!this.mesh || !this.mesh.physicsImpostor) return;
 
-            const direction = this.targetMesh.position.subtract(this.mesh.position).normalize();
-            const velocity = direction.scale(this.speed);
+            // Ajouter une rotation continue au projectile
+            this.mesh.rotation.x += 0.05; // Rotation sur l'axe X
+            this.mesh.rotation.y += 0.05; // Rotation sur l'axe Y
 
-            // Mettre à jour la vitesse pour suivre la cible
-            this.mesh.physicsImpostor.setLinearVelocity(velocity);
+            if (randomPhase) {
+                // Mouvement en étoile filante avec zigzag
+                const timeElapsed = Date.now() - startTime;
+                const zigzagFrequency = 0.1; // Fréquence du zigzag
+                const zigzagAmplitude = 0.5; // Amplitude du zigzag
 
-            const distance = BABYLON.Vector3.Distance(this.mesh.position, this.targetMesh.position);
-            if (distance <= 0.5) { // Threshold for hitting the target
-                this.hitTarget();
+                const zigzagOffset = Math.sin(timeElapsed * zigzagFrequency) * zigzagAmplitude * zigzagDirection;
+
+                const randomDirection = new BABYLON.Vector3(
+                    zigzagOffset, // Oscillation sur l'axe X
+                    1, // Vers le haut
+                    Math.random() * 0.5 - 0.25 // Légère variation sur l'axe Z
+                ).normalize();
+                const randomVelocity = randomDirection.scale(this.speed * 0.7); // Vitesse ajustée pour l'effet
+                this.mesh.physicsImpostor.setLinearVelocity(randomVelocity);
+
+                // Vérifier si la durée de l'effet étoile filante est écoulée
+                if (timeElapsed > randomDuration) {
+                    randomPhase = false; // Passer à la phase de ciblage
+                }
+            } else if (this.targetMesh) {
+                // Mouvement vers la cible
+                const direction = this.targetMesh.position.subtract(this.mesh.position).normalize();
+                const velocity = direction.scale(this.speed);
+                this.mesh.physicsImpostor.setLinearVelocity(velocity);
+
+                const distance = BABYLON.Vector3.Distance(this.mesh.position, this.targetMesh.position);
+                if (distance <= 0.5) { // Threshold for hitting the target
+                    this.hitTarget();
+                }
             }
         });
     }
@@ -126,6 +185,13 @@ export class Projectile {
     }
 
     private dispose() {
+        // Supprimer les particules associées
+        const particleSystem = this.mesh.metadata?.particleSystem;
+        if (particleSystem) {
+            particleSystem.stop();
+            particleSystem.dispose();
+        }
+
         this.mesh.physicsImpostor?.dispose(); // Supprime la physique
         this.mesh.dispose(); // Supprime le projectile
     }

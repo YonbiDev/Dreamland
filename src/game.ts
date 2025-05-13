@@ -12,14 +12,15 @@ import { enemies } from "./core/GlobalState";
 let waveManager: WaveManager;
 
 export class Game {
-    
+
     private engine: BABYLON.Engine;
     private scene: BABYLON.Scene;
     private canvas: HTMLCanvasElement;
     private uiManager: UIManager;
     private coins: number = 5; // Initialize with 5 coins
-    
+
     static health: number = 10;
+
 
     constructor() {
         this.canvas = document.getElementById("renderCanvas") as HTMLCanvasElement;
@@ -31,7 +32,7 @@ export class Game {
 
     private async init(): Promise<void> {
         new CameraController(this.scene, this.canvas);
-        this.uiManager = new UIManager(this.scene, this.canvas, this);
+        this.uiManager = UIManager.getInstance(this.scene, this.canvas, this);
 
         // Display initial coins
         this.uiManager.showTemporaryText(`Vous avez ${this.coins} éclats de rêves!`, 3000);
@@ -39,8 +40,9 @@ export class Game {
         // Show cinematic bars and add start wave button
         this.uiManager.showCinematicBars();
         this.uiManager.addStartWaveButton(() => {
-            if(waveManager)
-            waveManager.startWave(1, "level1_spawnpoint1", 5); // Example wave start
+            if (waveManager)
+                waveManager.startWave(); // Example wave start
+            
         });
 
         // Load the "LandMass" model
@@ -50,7 +52,7 @@ export class Game {
 
         const audioEngine = await BABYLON.CreateAudioEngineAsync();
 
-        const backgroundMusic = await BABYLON.CreateSoundAsync("backgroundMusic", 
+        const backgroundMusic = await BABYLON.CreateSoundAsync("backgroundMusic",
             "music.mp3"
         );
 
@@ -80,7 +82,8 @@ export class Game {
         }
 
         // Initialize the WaveManager
-        waveManager = new WaveManager(this.scene, WaypointManager);
+        waveManager = WaveManager.getInstance(this.scene,WaypointManager)
+        waveManager.initWave("level1_spawnpoint1"); // Example wave start
 
         this.engine.runRenderLoop(() => {
             const deltaTime = this.engine.getDeltaTime() / 1000; // Convertir en secondes
@@ -88,63 +91,8 @@ export class Game {
             // Update enemies
             enemies.forEach(enemy => enemy.update(deltaTime));
 
-            // Check if the wave is complete and start the next wave
-                          if (waveManager.areAllWavesComplete()) {
-                    this.showVictoryScene(); // Show victory scene if all waves are complete
-                } 
-
+           
             this.scene.render();
-        });
-    }
-
-    private showVictoryScene(): void {
-        // Clear the scene
-        this.scene.dispose();
-
-        // Create a new scene for the victory screen
-        const victoryScene = new BABYLON.Scene(this.engine);
-
-        // Add a background
-        const background = new BABYLON.Layer("background", "victoryBackground.png", victoryScene);
-
-        // Add victory text
-        const victoryText = document.createElement("div");
-        victoryText.innerText = "Victoire!";
-        victoryText.style.position = "absolute";
-        victoryText.style.top = "30%";
-        victoryText.style.left = "50%";
-        victoryText.style.transform = "translate(-50%, -50%)";
-        victoryText.style.fontSize = "48px";
-        victoryText.style.color = "white";
-        victoryText.style.textShadow = "2px 2px 8px rgba(0, 0, 0, 0.7)";
-        victoryText.style.zIndex = "1001";
-        document.body.appendChild(victoryText);
-
-        // Add a button to return to the main menu
-        const mainMenuButton = document.createElement("button");
-        mainMenuButton.innerText = "Retour au Menu Principal";
-        mainMenuButton.style.position = "absolute";
-        mainMenuButton.style.top = "50%";
-        mainMenuButton.style.left = "50%";
-        mainMenuButton.style.transform = "translate(-50%, -50%)";
-        mainMenuButton.style.padding = "15px 30px";
-        mainMenuButton.style.fontSize = "20px";
-        mainMenuButton.style.color = "white";
-        mainMenuButton.style.backgroundColor = "green";
-        mainMenuButton.style.border = "none";
-        mainMenuButton.style.borderRadius = "10px";
-        mainMenuButton.style.cursor = "pointer";
-        mainMenuButton.style.boxShadow = "0 4px 8px rgba(0, 0, 0, 0.3)";
-        mainMenuButton.style.zIndex = "1001";
-        mainMenuButton.onclick = () => {
-            document.body.innerHTML = ""; // Clear the victory screen
-            window.location.reload(); // Reload to show the main menu
-        };
-        document.body.appendChild(mainMenuButton);
-
-        // Render the victory scene
-        this.engine.runRenderLoop(() => {
-            victoryScene.render();
         });
     }
 
@@ -162,7 +110,6 @@ export class Game {
         this.uiManager.updateCoinDisplay(); // Update the UI
     }
 
-
     static getHealth(): number {
         return this.health;
     }
@@ -170,7 +117,6 @@ export class Game {
     static setHealth(newHealth: number) {
         this.health = newHealth;
     }
-    
 
 }
 
@@ -191,6 +137,7 @@ export function deleteEnemey(enemy: Enemy): void {
         enemies.splice(index, 1);
         console.log("📌 Enemy removed. Remaining enemies:", enemies.length);
     }
+
 }
 
 

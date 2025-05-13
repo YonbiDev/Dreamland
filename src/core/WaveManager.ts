@@ -1,6 +1,7 @@
 import { Enemy, Slime, Viking } from "./Enemy";
 import { WaypointManager } from "./WaypointManager";
 import { enemies } from "./GlobalState";
+import { UIManager } from "./UIManager";
 
 export class WaveManager {
     private scene: BABYLON.Scene;
@@ -8,8 +9,25 @@ export class WaveManager {
     private enemiesToSpawn: number;
     private spawnKey: string;
     private totalWaves: number = 2; // Example total number of waves
-    private currentWave: number = 0; // Track the current wave
-    private currentWaveEnemies: Enemy[] = []; // Track enemies of the current wave
+    private currentWave: number = 1; // Track the current wave
+    private currentWaveEnemies: Enemy[] = []; // Track enemies of the current wave.
+    private waveStarted: boolean = false;
+    private waveConfigurations: { [waveNumber: number]: string[] } = {
+        1: ["slime",],
+        2: ["knight",]
+    };
+
+    private static instance: WaveManager | null = null;
+
+    public static getInstance(scene?: BABYLON.Scene, waypointManager?: typeof WaypointManager): WaveManager {
+        if (!WaveManager.instance) {
+            if (!scene || !waypointManager) {
+                throw new Error("WaveManager has not been initialized. Please provide scene and waypointManager arguments.");
+            }
+            WaveManager.instance = new WaveManager(scene, waypointManager);
+        }
+        return WaveManager.instance;
+    }
 
     constructor(scene: BABYLON.Scene, waypointManager: typeof WaypointManager) {
         this.scene = scene;
@@ -18,50 +36,100 @@ export class WaveManager {
         this.spawnKey = "";
     }
 
-    public startWave(waveNumber: number, spawnKey: string, enemyCount: number): void {
-        this.enemiesToSpawn = enemyCount;
+    public initWave(spawnKey: string): void {
+        const enemyTypes = this.waveConfigurations[this.currentWave];
+        if (!enemyTypes) {
+            console.warn(`No configuration found for wave ${this.currentWave}.`);
+            return;
+        }
+
+        this.enemiesToSpawn = enemyTypes.length;
         this.spawnKey = spawnKey;
-        this.currentWave = waveNumber; // Update the current wave
+        // this.currentWave is already set, no need to reassign
         this.currentWaveEnemies = []; // Reset the current wave enemies
 
-        const spawnPositions = this.waypointManager.loadSpawnPositions(1, waveNumber, spawnKey);
-
-        // pour check si on les spawns
+        const spawnPositions = this.waypointManager.loadSpawnPositions(1, this.currentWave, spawnKey);
         if (spawnPositions.length === 0) {
             console.warn(`No spawn positions found for ${spawnKey}.`);
             return;
         }
-        
-        for (let i = 0; i < enemyCount; i++) {
+
+        console.log(`Wave ${this.currentWave} initialized with ${enemyTypes.length} enemies.`);
+    }
+
+    public startWave(): void {
+        const enemyTypes = this.waveConfigurations[this.currentWave];
+        if (!enemyTypes) {
+            console.warn(`No configuration found for wave ${this.currentWave}.`);
+            return;
+        }
+
+        const spawnPositions = this.waypointManager.loadSpawnPositions(1, this.currentWave, this.spawnKey);
+        if (spawnPositions.length === 0) {
+            console.warn(`No spawn positions found for ${this.spawnKey}.`);
+            return;
+        }
+
+        for (let i = 0; i < enemyTypes.length; i++) {
             setTimeout(() => {
-                const spawnPosition = spawnPositions[0].clone(); // Clone the position to ensure independence
+                const spawnPosition = spawnPositions[0].clone();
 
                 // Add spawn effect using sprite sheet
                 const spriteManager = new BABYLON.SpriteManager("spawnEffectManager", "spawnEffectEnemy.png", 14, { width: 0, height: 0 }, this.scene);
                 const sprite = new BABYLON.Sprite("spawnEffect", spriteManager);
                 sprite.position = spawnPosition.clone();
-                sprite.playAnimation(0, 14, false, 50); // Play frames 0 to 15, non-looping, 100ms per frame
-                sprite.size = 5; // Adjust size as needed
-                sprite.disposeWhenFinishedAnimating = true; // Dispose after animation finishes
+                sprite.playAnimation(0, 14, false, 50);
+                sprite.size = 5;
+                sprite.disposeWhenFinishedAnimating = true;
                 spriteManager.cellWidth = 896 / 14;
                 spriteManager.cellHeight = 69 / 1;
-                // Spawn the enemy
-                const enemy = new Slime(this.scene, spawnPosition, "1", "1");
+
+                // Spawn the enemy based on type
+                let enemy: Enemy;
+                switch (enemyTypes[i].toLowerCase()) {
+                    case "slime":
+                        enemy = new Slime(this.scene, spawnPosition, "1", "1");
+                        break;
+                    case "knight":
+                        enemy = new Viking(this.scene, spawnPosition, "1", "1");
+                        break;
+                    default:
+                        console.warn(`Unknown enemy type: ${enemyTypes[i]}`);
+                        return;
+                }
+
                 enemies.push(enemy);
-                this.currentWaveEnemies.push(enemy); // Track the enemy for the current wave
-                console.log(`Enemy ${i + 1} spawned at ${spawnPosition}`);
-            }, i * 3000); // Delay of 3000ms between each spawn
+                this.currentWaveEnemies.push(enemy);
+                console.log(`Enemy ${i + 1} (${enemyTypes[i]}) spawned at ${spawnPosition}`);
+
+                if (i === enemyTypes.length - 1) {
+                    this.waveStarted = true;
+                 
+                }
+            }, i * 3000);
         }
 
-        console.log(`Wave ${waveNumber} started with ${enemyCount} enemies.`);
+        console.log(`Wave ${this.currentWave} started with ${enemyTypes.length} enemies.`);
     }
 
     public isWaveComplete(): boolean {
-        // Check if all enemies of the current wave are dead
-        return this.currentWaveEnemies.every(enemy => !enemy.mesh || enemy.mesh.isDisposed());
+        if (this.waveStarted && this.currentWaveEnemies.every(enemy => !enemy.mesh || enemy.mesh.isDisposed())) {
+            this.waveStarted = false;
+            this.currentWave++;
+            UIManager.getInstance().showCinematicBars();
+            UIManager.getInstance().showStartWaveButton();
+                console.log(`Wave ${this.currentWave} completed. Starting next wave...`);
+
+             if (this.areAllWavesComplete()) {
+               UIManager.getInstance().showVictoryMenu();// Show victory scene if all waves are complete
+            }
+            return true;
+        } else {
+            return false;
+        }
     }
 
     public areAllWavesComplete(): boolean {
-        return this.currentWave >= this.totalWaves && this.isWaveComplete();
+        return this.currentWave > this.totalWaves;
     }
 }
