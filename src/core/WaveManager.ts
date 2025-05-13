@@ -13,7 +13,7 @@ export class WaveManager {
     private currentWaveEnemies: Enemy[] = []; // Track enemies of the current wave.
     private waveStarted: boolean = false;
     private waveConfigurations: { [waveNumber: number]: string[] } = {
-        1: ["slime",],
+        1: ["slime","knight"],
         2: ["knight",]
     };
 
