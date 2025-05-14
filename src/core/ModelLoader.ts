@@ -1,3 +1,5 @@
+const BASE_URL = "https://yonbidev.github.io/Dreamland/assets/";
+
 export class ModelLoader {
     static loadModel(
         scene: BABYLON.Scene,
@@ -11,7 +13,7 @@ export class ModelLoader {
     ): void {
         BABYLON.SceneLoader.ImportMesh(
             "",
-            "/public/",
+             BASE_URL,
             `${modelName}.glb`,
             scene,
             (meshes, particleSystems, skeletons, animationGroups) => {
