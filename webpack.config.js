@@ -37,5 +37,5 @@ module.exports = {
             template: path.resolve(appDirectory, "index.html"),
         })
     ],
-    mode: "development",
+    mode: "production",
 };
