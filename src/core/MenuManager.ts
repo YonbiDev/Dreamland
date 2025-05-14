@@ -15,7 +15,7 @@ export class MenuManager {
         menuContainer.style.overflow = "hidden"; // Prevent overflow for mouse effects
 
         // Add background video
-        const backgroundVideo = document.createElement("video");
+    /*    const backgroundVideo = document.createElement("video");
         backgroundVideo.src = "mainmenu_video.mp4";
         backgroundVideo.autoplay = true;
         backgroundVideo.loop = true;
@@ -30,7 +30,7 @@ export class MenuManager {
         menuContainer.appendChild(backgroundVideo);
 
         // Add background music
-        const audioEngine = await BABYLON.CreateAudioEngineAsync();
+       /* const audioEngine = await BABYLON.CreateAudioEngineAsync();
 
         const backgroundMusic = await BABYLON.CreateSoundAsync("backgroundMusic", 
             "mainmenu_music.mp3"
@@ -39,7 +39,7 @@ export class MenuManager {
 
         backgroundMusic.play();
 
-
+*/
         // Add title
         const title = document.createElement("h1");
         title.innerText = "Les Défenseurs de Dreamfall";
@@ -85,7 +85,7 @@ export class MenuManager {
             button.onclick = () => {
                 if (level.id === "level1") {
                     document.body.removeChild(menuContainer);
-                            backgroundMusic.stop();
+                            //backgroundMusic.stop();
 
                     onLevelSelect(level.id);
                 }
