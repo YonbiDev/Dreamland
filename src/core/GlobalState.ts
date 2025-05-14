@@ -1,6 +1,7 @@
 import { Game } from "../game";
 import { Enemy } from "./Enemy";
 
+
 export const enemies: Enemy[] = [];
 
 // Nettoyez les ennemis invalides périodiquement

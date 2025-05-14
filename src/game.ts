@@ -11,6 +11,8 @@ import { enemies } from "./core/GlobalState";
 
 let waveManager: WaveManager;
 
+const ASSET_BASE_URL = "https://yonbidev.github.io/Dreamland/assets/";
+
 export class Game {
 
     private engine: BABYLON.Engine;
@@ -53,7 +55,7 @@ export class Game {
         const audioEngine = await BABYLON.CreateAudioEngineAsync();
 
         const backgroundMusic = await BABYLON.CreateSoundAsync("backgroundMusic",
-            "music.mp3"
+           ASSET_BASE_URL + "music.mp3"
         );
 
         // Wait until audio engine is ready to play sounds.
