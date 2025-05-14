@@ -102,7 +102,7 @@ export class UIManager {
 
         // Add coin image
         const coinImage = document.createElement("img");
-        coinImage.src = ASSET_BASE_URL + "UI_Diamond.png"; // Path to the coin image
+        coinImage.src = ASSET_BASE_URL + "UI_Diamond.PNG"; // Path to the coin image
         coinImage.alt = "Éclats de Rêves";
         coinImage.style.width = "20px";
         coinImage.style.height = "20px";
