@@ -3,6 +3,9 @@ import { ModelLoader } from "./ModelLoader";
 import { Game } from "../game";
 import { int } from "babylonjs";
 
+
+const ASSET_BASE_URL = "https://yonbidev.github.io/Dreamland/assets/";
+
 export class UIManager {
     private static instance: UIManager | null = null;
 
@@ -58,7 +61,7 @@ export class UIManager {
         document.body.appendChild(uiContainer);
 
         // Add placeholders for objects
-        this.createPlaceholder(uiContainer, "turret", "Turret1Image.png", "Turret", `
+        this.createPlaceholder(uiContainer, "turret", ASSET_BASE_URL + "Turret1Image.png", "Turret", `
         <div style="text-align: left;">
     <strong style="font-size: 14px; color: #4CAF50;">Tourelle</strong><br>
     <span style="font-size: 12px;">Portée : <strong>30</strong></span><br>
@@ -68,14 +71,14 @@ export class UIManager {
 </div>
         `);
 
-        this.createPlaceholder(uiContainer, "placeholder2", "Placeholder2Image.png", "Placeholder 2", `
+        this.createPlaceholder(uiContainer, "placeholder2", ASSET_BASE_URL + "Placeholder2Image.png", "Placeholder 2", `
             <div style="text-align: left;">
                 <strong style="font-size: 14px; color: #FF9800;">Placeholder 2</strong><br>
                 <span style="font-size: 12px;">Coming Soon...</span>
             </div>
         `);
 
-        this.createPlaceholder(uiContainer, "placeholder3", "Placeholder3Image.png", "Placeholder 3", `
+        this.createPlaceholder(uiContainer, "placeholder3", ASSET_BASE_URL + "Placeholder3Image.png", "Placeholder 3", `
             <div style="text-align: left;">
                 <strong style="font-size: 14px; color: #FF5722;">Placeholder 3</strong><br>
                 <span style="font-size: 12px;">Coming Soon...</span>
@@ -99,7 +102,7 @@ export class UIManager {
 
         // Add coin image
         const coinImage = document.createElement("img");
-        coinImage.src = "UI_Diamond.png"; // Path to the coin image
+        coinImage.src = ASSET_BASE_URL + "UI_Diamond.png"; // Path to the coin image
         coinImage.alt = "Éclats de Rêves";
         coinImage.style.width = "20px";
         coinImage.style.height = "20px";
@@ -129,7 +132,7 @@ export class UIManager {
 
         // Add heart image
         const heartImage = document.createElement("img");
-        heartImage.src = "UI_Heart.png"; // Path to the heart image
+        heartImage.src = ASSET_BASE_URL + "UI_Heart.png"; // Path to the heart image
         heartImage.alt = "Heart";
         heartImage.style.width = "20px";
         heartImage.style.height = "20px";
