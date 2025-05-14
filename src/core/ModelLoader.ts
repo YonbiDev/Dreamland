@@ -11,7 +11,7 @@ export class ModelLoader {
     ): void {
         BABYLON.SceneLoader.ImportMesh(
             "",
-            "/",
+            "https://yonbidev.github.io/Dreamland/public/",
             `${modelName}.glb`,
             scene,
             (meshes, particleSystems, skeletons, animationGroups) => {
