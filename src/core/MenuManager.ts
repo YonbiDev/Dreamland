@@ -15,9 +15,9 @@ export class MenuManager {
         menuContainer.style.overflow = "hidden"; // Prevent overflow for mouse effects
 
         // Add background video
-        const backgroundVideo = document.createElement("video");
-        backgroundVideo.src = "https://yonbidev.github.io/Dreamland/assets/mainmenu_video.mp4";
-        backgroundVideo.autoplay = true;
+       const backgroundVideo = document.createElement("video");
+backgroundVideo.src = "https://yonbidev.github.io/Dreamland/assets/mainmenu_video.mp4"; // .mp4, not .mp3
+backgroundVideo.autoplay = true;
         backgroundVideo.loop = true;
         backgroundVideo.muted = true;
         backgroundVideo.style.position = "absolute";
