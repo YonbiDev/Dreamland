@@ -16,7 +16,7 @@ export class MenuManager {
 
         // Add background video
         const backgroundVideo = document.createElement("video");
-        backgroundVideo.src =     "https://yonbidev.github.io/Dreamland/assets/mainmenu_video.mp3";
+        backgroundVideo.src =     "https://yonbidev.github.io/Dreamland/assets/mainmenu_video.mp4";
         backgroundVideo.autoplay = true;
         backgroundVideo.loop = true;
         backgroundVideo.muted = true;
