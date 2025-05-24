@@ -376,7 +376,7 @@ private addMouseTrailEffect(): void {
         this.isPlacingObject = true;
 
         if (objectType === "turret") {
-            ModelLoader.loadModel(this.scene, "garden_tree_2", (result) => {
+            ModelLoader.loadModel(this.scene, "assets/garden_tree_2", (result) => {
                 this.previewMesh = result.meshes[0] as BABYLON.Mesh;
                 this.previewMesh.name = `preview_${objectType}`; // Set the correct name
                 this.previewMesh.scaling = new BABYLON.Vector3(2, 2, 2); // Adjust scale as needed
