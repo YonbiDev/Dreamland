@@ -1,5 +1,8 @@
 import { Game } from "./game";
 import { MenuManager } from "./core/MenuManager";
+import { Engine, Scene, ArcRotateCamera, HemisphericLight, Vector3, MeshBuilder } from "@babylonjs/core";
+import "@babylonjs/loaders"; // si tu charges des .glb/.gltf
+
 
 window.addEventListener("DOMContentLoaded", () => {
     const menuManager = new MenuManager();

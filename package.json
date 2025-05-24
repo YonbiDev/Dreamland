@@ -22,6 +22,9 @@
     "webpack-dev-server": "^5.2.0"
   },
   "dependencies": {
+    "@babylonjs/core": "^8.9.0",
+    "@babylonjs/gui": "^8.9.0",
+    "@babylonjs/loaders": "^8.9.0",
     "babylonjs": "^7.53.3",
     "babylonjs-loaders": "^7.53.3",
     "cannon": "^0.6.2",

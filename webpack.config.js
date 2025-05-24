@@ -10,6 +10,7 @@ module.exports = {
     output: {
         filename: "app.js",
         path: path.resolve(appDirectory, "dist"),
+        publicPath: "/", // ✅ important pour que les chunks soient trouvés !
         clean: true,
     },
     resolve: {
