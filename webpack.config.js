@@ -44,7 +44,7 @@ module.exports = {
         new CopyWebpackPlugin({
             patterns: [
                 { from: path.resolve(appDirectory, "assets"), to: "assets" },
-                { from: path.resolve(appDirectory, "maps"), to: "maps" }, // ✅ bien séparé de assets
+    { from: path.resolve(appDirectory, "maps"), to: "maps" }, // ✅ correct ici
             ],
         }),
     ],
