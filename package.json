@@ -12,6 +12,7 @@
   "license": "ISC",
   "description": "",
   "devDependencies": {
+    "copy-webpack-plugin": "^13.0.0",
     "gh-pages": "^6.3.0",
     "html-webpack-plugin": "^5.6.3",
     "ts-loader": "^9.5.2",

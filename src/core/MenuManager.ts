@@ -16,7 +16,7 @@ export class MenuManager {
 
         // Add background video
        const backgroundVideo = document.createElement("video");
-backgroundVideo.src = "https://yonbidev.github.io/Dreamland/assets/mainmenu_video.mp4"; // .mp4, not .mp3
+backgroundVideo.src = "assets/mainmenu_video.mp4"; // .mp4, not .mp3
 backgroundVideo.autoplay = true;
         backgroundVideo.loop = true;
         backgroundVideo.muted = true;
@@ -33,7 +33,7 @@ backgroundVideo.autoplay = true;
         const audioEngine = await BABYLON.CreateAudioEngineAsync();
 
         const backgroundMusic = await BABYLON.CreateSoundAsync("backgroundMusic", 
-            "https://yonbidev.github.io/Dreamland/assets/mainmenu_music.mp3"
+            "assets/mainmenu_music.mp3"
     
         );
        await audioEngine.unlock();
