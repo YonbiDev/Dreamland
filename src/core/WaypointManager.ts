@@ -1,55 +1,49 @@
 export class WaypointManager {
-    public static saveWaypoints(key: string, waypointLists: BABYLON.Vector3[][]): void {
+    public static async saveToFile(key: string, waypointLists: BABYLON.Vector3[][], spawnPositions: BABYLON.Vector3[]): Promise<void> {
+        const data: Record<string, any> = {
+            spawns: spawnPositions.map(sp => ({ x: sp.x, y: sp.y, z: sp.z }))
+        };
+
         waypointLists.forEach((list, index) => {
-            const filename = `${key}_waypoint${index + 1}.json`;
-            const waypointData = JSON.stringify(list.map(wp => ({ x: wp.x, y: wp.y, z: wp.z })));
-            localStorage.setItem(filename, waypointData);
-            console.log(`Waypoints saved to ${filename}:`, waypointData);
+            data[`waypoint${index + 1}`] = list.map(wp => ({ x: wp.x, y: wp.y, z: wp.z }));
         });
+
+        const json = JSON.stringify(data, null, 2);
+
+        // Crée un fichier téléchargeable
+        const blob = new Blob([json], { type: "application/json" });
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = `${key}_mapData.json`;
+        a.click();
+        URL.revokeObjectURL(a.href);
+
+        console.log(`Map data saved as file: ${key}_mapData.json`, data);
     }
 
-    public static loadWaypoints(key: string): BABYLON.Vector3[][] {
-        const waypointLists: BABYLON.Vector3[][] = [];
-        let index = 1;
+    public static async loadFromFile(key: string): Promise<{
+        waypoints: BABYLON.Vector3[][],
+        spawns: BABYLON.Vector3[]
+    }> {
+        const filePath = `/maps/${key}_mapData.json`;
 
-        while (true) {
-            const filename = `${key}_waypoint${index}.json`;
-            const waypointData = localStorage.getItem(filename);
-            if (!waypointData) break;
+        try {
+            const response = await fetch(filePath);
+            const data = await response.json();
 
-            const waypoints = JSON.parse(waypointData).map((wp: { x: number; y: number; z: number }) =>
-                new BABYLON.Vector3(wp.x, wp.y, wp.z)
-            );
-            waypointLists.push(waypoints);
-            index++;
+            const waypoints: BABYLON.Vector3[][] = Object.keys(data)
+                .filter(k => k.startsWith("waypoint"))
+                .map(k => data[k].map((wp: any) => new BABYLON.Vector3(wp.x, wp.y, wp.z)));
+
+            const spawns: BABYLON.Vector3[] = data.spawns
+                ? data.spawns.map((sp: any) => new BABYLON.Vector3(sp.x, sp.y, sp.z))
+                : [];
+
+            console.log(`Map data loaded from ${filePath}`, { waypoints, spawns });
+            return { waypoints, spawns };
+        } catch (error) {
+            console.error("Erreur de chargement de la map :", error);
+            return { waypoints: [], spawns: [] };
         }
-
-        console.log(`Waypoints loaded for ${key}:`, waypointLists);
-        return waypointLists;
     }
-
-    public static saveSpawnPositions(key: string, spawnPositions: BABYLON.Vector3[]): void {
-        const filename = `${key}_spawns.json`;
-        const spawnData = JSON.stringify(spawnPositions.map(sp => ({ x: sp.x, y: sp.y, z: sp.z })));
-        localStorage.setItem(filename, spawnData);
-        console.log(`Spawn positions saved to ${filename}:`, spawnData);
-    }
-
-    public static loadSpawnPositions(level: number, spawnPositionNumber: number, key: string): BABYLON.Vector3[] {
-        const filename = `${key}_spawns.json`;
-        const spawnData = localStorage.getItem(filename);
-        if (!spawnData) {
-            console.warn(`No spawn positions found for ${key}.`);
-            return [];
-        }
-
-        const spawnPositions = JSON.parse(spawnData).map((sp: { x: number; y: number; z: number }) =>
-            new BABYLON.Vector3(sp.x, sp.y, sp.z)
-        );
-
-        console.log(`Spawn positions loaded for ${key}:`, spawnPositions);
-        return spawnPositions;
-    }
-
-    
 }

@@ -1,7 +1,7 @@
 const path = require("path");
 const fs = require("fs");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
-const CopyWebpackPlugin = require("copy-webpack-plugin"); // ✅ ajout ici
+const CopyWebpackPlugin = require("copy-webpack-plugin");
 
 const appDirectory = fs.realpathSync(process.cwd());
 
@@ -10,7 +10,7 @@ module.exports = {
     output: {
         filename: "app.js",
         path: path.resolve(appDirectory, "dist"),
-        publicPath: "/", // ✅ important pour que les chunks soient trouvés !
+        publicPath: "/", // important pour charger les assets
         clean: true,
     },
     resolve: {
@@ -19,10 +19,9 @@ module.exports = {
     devServer: {
         host: "0.0.0.0",
         port: 8080,
-        static: [
-            path.resolve(appDirectory, "public"),
-            path.resolve(appDirectory, "dist")
-        ],
+        static: {
+            directory: path.resolve(appDirectory, "dist"),
+        },
         hot: true,
         devMiddleware: {
             publicPath: "/",
@@ -44,9 +43,11 @@ module.exports = {
         }),
         new CopyWebpackPlugin({
             patterns: [
-                { from: "assets", to: "assets" } // ✅ copie les fichiers dans dist/assets
+                { from: path.resolve(appDirectory, "assets"), to: "assets" },
+                { from: path.resolve(appDirectory, "maps"), to: "maps" }, // ✅ bien séparé de assets
             ],
-        })
+        }),
     ],
-    mode: "production",
+    //mode: "development", // ⛔️ pas production pour le dev
+     mode: "production",
 };

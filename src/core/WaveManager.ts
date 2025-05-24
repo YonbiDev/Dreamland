@@ -12,6 +12,7 @@ export class WaveManager {
     private currentWave: number = 1; // Track the current wave
     private currentWaveEnemies: Enemy[] = []; // Track enemies of the current wave.
     private waveStarted: boolean = false;
+    private spawnPositions: BABYLON.Vector3[] = []; // Store spawn positions for the current wav
     private waveConfigurations: { [waveNumber: number]: string[] } = {
         1: ["slime","knight"],
         2: ["knight",]
@@ -36,43 +37,55 @@ export class WaveManager {
         this.spawnKey = "";
     }
 
-    public initWave(spawnKey: string): void {
-        const enemyTypes = this.waveConfigurations[this.currentWave];
-        if (!enemyTypes) {
-            console.warn(`No configuration found for wave ${this.currentWave}.`);
-            return;
-        }
+   public async initWave(spawnKey: string): Promise<void> {
+    const enemyTypes = this.waveConfigurations[this.currentWave];
+    if (!enemyTypes) {
+        console.warn(`No configuration found for wave ${this.currentWave}.`);
+        return;
+    }
 
-        this.enemiesToSpawn = enemyTypes.length;
-        this.spawnKey = spawnKey;
-        // this.currentWave is already set, no need to reassign
-        this.currentWaveEnemies = []; // Reset the current wave enemies
+    this.enemiesToSpawn = enemyTypes.length;
+    this.spawnKey = spawnKey;
+    this.currentWaveEnemies = []; // Reset the current wave enemies
 
-        const spawnPositions = this.waypointManager.loadSpawnPositions(1, this.currentWave, spawnKey);
-        if (spawnPositions.length === 0) {
+    try {
+        const { spawns } = await WaypointManager.loadFromFile(spawnKey);
+        if (!spawns || spawns.length === 0) {
             console.warn(`No spawn positions found for ${spawnKey}.`);
             return;
         }
 
+        this.spawnPositions = spawns;
+
         console.log(`Wave ${this.currentWave} initialized with ${enemyTypes.length} enemies.`);
+    } catch (error) {
+        console.error(`Failed to initialize wave:`, error);
+    }
+}
+public async startWave(): Promise<void> {
+    const enemyTypes = this.waveConfigurations[this.currentWave];
+    if (!enemyTypes) {
+        console.warn(`No configuration found for wave ${this.currentWave}.`);
+        return;
     }
 
-    public startWave(): void {
-        const enemyTypes = this.waveConfigurations[this.currentWave];
-        if (!enemyTypes) {
-            console.warn(`No configuration found for wave ${this.currentWave}.`);
+    if (!this.spawnPositions || this.spawnPositions.length === 0) {
+        try {
+            const { spawns } = await WaypointManager.loadFromFile(this.spawnKey);
+            if (!spawns || spawns.length === 0) {
+                console.warn(`No spawn positions found for ${this.spawnKey}.`);
+                return;
+            }
+            this.spawnPositions = spawns;
+        } catch (error) {
+            console.error("Error loading spawn positions:", error);
             return;
         }
+    }
 
-        const spawnPositions = this.waypointManager.loadSpawnPositions(1, this.currentWave, this.spawnKey);
-        if (spawnPositions.length === 0) {
-            console.warn(`No spawn positions found for ${this.spawnKey}.`);
-            return;
-        }
-
-        for (let i = 0; i < enemyTypes.length; i++) {
+   for (let i = 0; i < enemyTypes.length; i++) {
             setTimeout(() => {
-                const spawnPosition = spawnPositions[0].clone();
+                const spawnPosition = this.spawnPositions[0].clone();
 
                 // Add spawn effect using sprite sheet
                 const spriteManager = new BABYLON.SpriteManager("spawnEffectManager", "assets/spawnEffectEnemy.png", 14, { width: 0, height: 0 }, this.scene);
@@ -110,7 +123,8 @@ export class WaveManager {
         }
 
         console.log(`Wave ${this.currentWave} started with ${enemyTypes.length} enemies.`);
-    }
+    
+}
 
     public isWaveComplete(): boolean {
         if (this.waveStarted && this.currentWaveEnemies.every(enemy => !enemy.mesh || enemy.mesh.isDisposed())) {

@@ -34,6 +34,8 @@ export class Game {
 
     private async init(): Promise<void> {
         new CameraController(this.scene, this.canvas);
+       
+       
         this.uiManager = UIManager.getInstance(this.scene, this.canvas, this);
 
         // Display initial coins
@@ -46,7 +48,6 @@ export class Game {
                 waveManager.startWave(); // Example wave start
             
         });
-
         // Load the "LandMass" model
         ModelLoader.loadModel(this.scene, "LandMass", result => {
             //console.log("LandMass model loaded:", result.meshes);
@@ -77,7 +78,7 @@ export class Game {
         skyboxMaterial.reflectionTexture.coordinatesMode = BABYLON.Texture.SKYBOX_MODE;
 
         skybox.material = skyboxMaterial;
-
+     // const waypointEditor = new WaypointEditor(this.scene);
         // Enable the waypoint editor in development mode
         if (process.env.NODE_ENV === "development") {
             // const waypointEditor = new WaypointEditor(this.scene);

@@ -266,6 +266,34 @@ export class WaypointEditor {
         clearWaypointsButton.onclick = () => this.clearCurrentWaypointList();
         controlPanel.appendChild(clearWaypointsButton);
 
+        // Bouton pour exporter la map (waypoints + spawns)
+        const exportMapButton = document.createElement("button");
+        exportMapButton.innerText = "Export Map (JSON)";
+        exportMapButton.style.width = "100%";
+        exportMapButton.style.padding = "10px";
+        exportMapButton.style.marginBottom = "15px";
+        exportMapButton.style.border = "none";
+        exportMapButton.style.borderRadius = "5px";
+        exportMapButton.style.backgroundColor = "#607D8B";
+        exportMapButton.style.color = "#fff";
+        exportMapButton.style.cursor = "pointer";
+        exportMapButton.onclick = () => this.exportMap();
+        controlPanel.appendChild(exportMapButton);
+
+        // Bouton pour importer une map (JSON)
+        const importMapButton = document.createElement("button");
+        importMapButton.innerText = "Import Map (JSON)";
+        importMapButton.style.width = "100%";
+        importMapButton.style.padding = "10px";
+        importMapButton.style.marginBottom = "15px";
+        importMapButton.style.border = "none";
+        importMapButton.style.borderRadius = "5px";
+        importMapButton.style.backgroundColor = "#795548";
+        importMapButton.style.color = "#fff";
+        importMapButton.style.cursor = "pointer";
+        importMapButton.onclick = () => this.importMap();
+        controlPanel.appendChild(importMapButton);
+
         // Conteneur pour afficher les données existantes
         const dataContainer = document.createElement("div");
         dataContainer.id = "dataContainer";
@@ -615,5 +643,48 @@ export class WaypointEditor {
             [index]?.dispose();
         this.displayExistingData();
         console.log(`Spawn position ${index + 1} deleted.`);
+    }
+
+    // Exporte la map courante (waypoints + spawns) en JSON via WaypointManager
+    private async exportMap(): Promise<void> {
+        const waypointLists = this.waypointsByLevelAndSpawn.get(this.currentKey) || [];
+        await WaypointManager.saveToFile(this.currentKey, waypointLists, this.spawnPositions);
+    }
+
+    // Importe une map (waypoints + spawns) depuis un fichier JSON via WaypointManager
+    private async importMap(): Promise<void> {
+        // Crée un input file caché pour sélectionner le fichier
+        const input = document.createElement("input");
+        input.type = "file";
+        input.accept = ".json";
+        input.onchange = async (e: any) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = async (evt) => {
+                try {
+                    const data = JSON.parse(evt.target!.result as string);
+                    // Reconstruit les waypoints
+                    const waypointLists: BABYLON.Vector3[][] = Object.keys(data)
+                        .filter(k => k.startsWith("waypoint"))
+                        .map(k => data[k].map((wp: any) => new BABYLON.Vector3(wp.x, wp.y, wp.z)));
+                    // Reconstruit les spawns
+                    const spawns: BABYLON.Vector3[] = data.spawns
+                        ? data.spawns.map((sp: any) => new BABYLON.Vector3(sp.x, sp.y, sp.z))
+                        : [];
+                    // Remplace les données actuelles
+                    this.waypointsByLevelAndSpawn.set(this.currentKey, waypointLists);
+                    this.spawnPositions = spawns;
+                    this.displayWaypointsOfCurrentList();
+                    this.visualizeSpawnPositions();
+                    this.displayExistingData();
+                    console.log("Map imported from file:", data);
+                } catch (err) {
+                    alert("Erreur lors de l'import du fichier JSON.");
+                }
+            };
+            reader.readAsText(file);
+        };
+        input.click();
     }
 }
