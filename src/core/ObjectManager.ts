@@ -1,3 +1,5 @@
+import { Turret } from "./Turret";
+
 export class ObjectManager {
     private scene: BABYLON.Scene;
     private objectTypes: { [key: string]: { size: number; color: BABYLON.Color3 } } = {
@@ -19,10 +21,7 @@ export class ObjectManager {
         if (!objectConfig) return;
 
         if (objectType === "turret") {
-            import("./Turret").then(module => {
-                const Turret = module.Turret;
-                new Turret(this.scene, position, 30,50,2000); // Default range is 100
-            });
+            new Turret(this.scene, position, 30, 50, 2000);
         } else {
             const object = BABYLON.MeshBuilder.CreateBox(objectType, { size: objectConfig.size }, this.scene);
             object.position = position;
