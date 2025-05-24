@@ -40,7 +40,7 @@ export class Enemy {
 
     private addWalkingParticleEffect(): void {
         const particleSystem = new BABYLON.ParticleSystem("walkingParticles", 2000, this.scene);
-        particleSystem.particleTexture = new BABYLON.Texture("particles/17.png", this.scene); // Use 17.png texture
+        particleSystem.particleTexture = new BABYLON.Texture("assets/particles/17.png", this.scene); // Use 17.png texture
         particleSystem.emitter = this.mesh; // Attach to the enemy mesh
         particleSystem.minEmitBox = new BABYLON.Vector3(-0.2, 0, -0.2); // Emit from a slightly larger area
         particleSystem.maxEmitBox = new BABYLON.Vector3(0.2, 0, 0.2);

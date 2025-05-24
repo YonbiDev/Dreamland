@@ -1,4 +1,4 @@
-const BASE_URL = "https://yonbidev.github.io/Dreamland/assets/";
+const BASE_URL = "assets/";
 
 export class ModelLoader {
     static loadModel(

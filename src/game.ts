@@ -11,7 +11,7 @@ import { enemies } from "./core/GlobalState";
 
 let waveManager: WaveManager;
 
-const ASSET_BASE_URL = "https://yonbidev.github.io/Dreamland/assets/";
+const ASSET_BASE_URL = "assets/";
 
 export class Game {
 
@@ -73,7 +73,7 @@ export class Game {
         const skyboxMaterial = new BABYLON.StandardMaterial("skyBoxMaterial", this.scene);
         skyboxMaterial.backFaceCulling = false;
         skyboxMaterial.disableLighting = true;
-        skyboxMaterial.reflectionTexture = new BABYLON.CubeTexture("textures/skybox", this.scene);
+        skyboxMaterial.reflectionTexture = new BABYLON.CubeTexture("assets/textures/skybox", this.scene);
         skyboxMaterial.reflectionTexture.coordinatesMode = BABYLON.Texture.SKYBOX_MODE;
 
         skybox.material = skyboxMaterial;

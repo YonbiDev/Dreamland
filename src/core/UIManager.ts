@@ -4,7 +4,7 @@ import { Game } from "../game";
 import { int } from "babylonjs";
 
 
-const ASSET_BASE_URL = "https://yonbidev.github.io/Dreamland/assets/";
+const ASSET_BASE_URL = "assets/";
 
 export class UIManager {
     private static instance: UIManager | null = null;

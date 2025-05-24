@@ -40,7 +40,7 @@ export class Projectile {
 
     private addParticleEffect() {
         const particleSystem = new BABYLON.ParticleSystem("projectileTrail", 200, this.scene);
-        particleSystem.particleTexture = new BABYLON.Texture("textures/flare.png", this.scene);
+        particleSystem.particleTexture = new BABYLON.Texture("assets/particles/flare.png", this.scene);
         particleSystem.emitter = this.mesh; // Émettre depuis le projectile
         particleSystem.minEmitBox = new BABYLON.Vector3(-0.1, -0.1, -0.1); // Zone d'émission minimale
         particleSystem.maxEmitBox = new BABYLON.Vector3(0.1, 0.1, 0.1); // Zone d'émission maximale
@@ -134,7 +134,7 @@ export class Projectile {
 
     private createHitEffect() {
         const particleSystem = new BABYLON.ParticleSystem("hitEffect", 100, this.scene);
-        particleSystem.particleTexture = new BABYLON.Texture("textures/flare.png", this.scene);
+        particleSystem.particleTexture = new BABYLON.Texture("assets/particles/flare.png", this.scene);
         particleSystem.emitter = this.mesh.position.clone(); // Emit from the projectile's position
         particleSystem.minEmitBox = new BABYLON.Vector3(-0.1, -0.1, -0.1); // Emit in a small area
         particleSystem.maxEmitBox = new BABYLON.Vector3(0.1, 0.1, 0.1);
@@ -160,7 +160,7 @@ export class Projectile {
 
     private createDeathEffect(position: BABYLON.Vector3) {
         const particleSystem = new BABYLON.ParticleSystem("deathEffect", 200, this.scene);
-        particleSystem.particleTexture = new BABYLON.Texture("particles/28.png", this.scene);
+        particleSystem.particleTexture = new BABYLON.Texture("assets/particles/28.png", this.scene);
         particleSystem.emitter = position; // Emit from the enemy's position
         particleSystem.minEmitBox = new BABYLON.Vector3(-0.5, -0.5, -0.5);
         particleSystem.maxEmitBox = new BABYLON.Vector3(0.5, 0.5, 0.5);
