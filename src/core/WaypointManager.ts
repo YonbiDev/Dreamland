@@ -25,7 +25,7 @@ export class WaypointManager {
         waypoints: BABYLON.Vector3[][],
         spawns: BABYLON.Vector3[]
     }> {
-        const filePath = `/maps/${key}_mapData.json`;
+        const filePath = `maps/${key}_mapData.json`;
 
         try {
             const response = await fetch(filePath);
