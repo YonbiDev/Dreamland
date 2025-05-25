@@ -10,13 +10,19 @@ export class Enemy {
     waypoints: BABYLON.Vector3[];
     currentWaypointIndex: number = 0;
     speed: number = 20 // Movement speed
+    _originalSpeed?: number; // Ajout pour le slow effect
     private movementVariation: number = 0.02; // Variation factor for natural movement
     private randomSpeedOffset: number;
     private updateInterval: number;
+    private healthBar: BABYLON.Mesh; // Ajout de la barre de vie
+    private healthBarBg: BABYLON.Mesh; // Fond de la barre de vie
+    private healthBarBack: BABYLON.Mesh; // Barre de vie arrière
+    private maxHealth: number; // Pourcentage max de vie
 
     constructor(scene: BABYLON.Scene, modelName: string, position: BABYLON.Vector3, health: number = 10, level: string, spawnLabel: string) {
         this.scene = scene;
         this.health = health;
+        this.maxHealth = health;
 
         // Load waypoints for the given level and spawn label from JSON
         const key = `level${level}_spawnpoint${spawnLabel}`;
@@ -41,6 +47,9 @@ export class Enemy {
             this.mesh.scaling.scaleInPlace(4); // Scale down the model
             this.mesh.metadata = this.mesh.metadata || {};
             this.mesh.metadata.enemyInstance = this;
+
+            // Ajout de la barre de vie
+            this.createHealthBar();
 
             // Add particle system for walking effect
             this.addWalkingParticleEffect();
@@ -83,6 +92,60 @@ export class Enemy {
         particleSystem.updateSpeed = 0.02;
 
         particleSystem.start(); // Start the particle system
+    }
+
+    private createHealthBar() {
+        // Fond noir (plus petit et plus proche)
+        this.healthBarBg = BABYLON.MeshBuilder.CreatePlane("healthBarBg", {width: .8, height: 0.08}, this.scene);
+        this.healthBarBg.parent = this.mesh;
+        this.healthBarBg.position = new BABYLON.Vector3(0, 1, 0); // Plus proche du modèle
+        this.healthBarBg.rotation = new BABYLON.Vector3(0, 0, 0);
+        this.healthBarBg.isPickable = false;
+        const bgMat = new BABYLON.StandardMaterial("healthBarBgMat", this.scene);
+        bgMat.diffuseColor = new BABYLON.Color3(0, 0, 0);
+        bgMat.emissiveColor = new BABYLON.Color3(0, 0, 0);
+        bgMat.specularColor = new BABYLON.Color3(0, 0, 0);
+        bgMat.backFaceCulling = false; // Important pour voir la barre des deux côtés
+        this.healthBarBg.material = bgMat;
+
+        // Barre rouge devant
+        this.healthBar = BABYLON.MeshBuilder.CreatePlane("healthBar", {width: 0.7, height: 0.05}, this.scene);
+        this.healthBar.parent = this.mesh;
+        this.healthBar.position = new BABYLON.Vector3(0, 1, 0.015); // Devant le fond
+        this.healthBar.rotation = new BABYLON.Vector3(0, 0, 0);
+        this.healthBar.isPickable = false;
+        const barMat = new BABYLON.StandardMaterial("healthBarMat", this.scene);
+        barMat.diffuseColor = new BABYLON.Color3(1, 0, 0);
+        barMat.emissiveColor = new BABYLON.Color3(1, 0, 0);
+        barMat.specularColor = new BABYLON.Color3(0, 0, 0);
+        barMat.backFaceCulling = false; // Important pour voir la barre des deux côtés
+        barMat.twoSidedLighting = true; // Ajouté pour améliorer la visibilité des deux côtés
+        this.healthBar.material = barMat;
+
+        // Barre rouge derrière
+        this.healthBarBack = BABYLON.MeshBuilder.CreatePlane("healthBarBack", {width: 0.7, height: 0.05}, this.scene);
+        this.healthBarBack.parent = this.mesh;
+        this.healthBarBack.position = new BABYLON.Vector3(0, 1, -0.015); // Derrière le fond
+        this.healthBarBack.rotation = new BABYLON.Vector3(0, 0, 0);
+        this.healthBarBack.isPickable = false;
+        const barMatBack = new BABYLON.StandardMaterial("healthBarMatBack", this.scene);
+        barMatBack.diffuseColor = new BABYLON.Color3(1, 0, 0);
+        barMatBack.emissiveColor = new BABYLON.Color3(1, 0, 0);
+        barMatBack.specularColor = new BABYLON.Color3(0, 0, 0);
+        barMatBack.backFaceCulling = false;
+        barMatBack.twoSidedLighting = true;
+        this.healthBarBack.material = barMatBack;
+    }
+
+    private updateHealthBar() {
+        if (!this.healthBar) return;
+        const percent = Math.max(0, this.health / this.maxHealth);
+        this.healthBar.scaling.x = percent;
+        this.healthBar.position.x = 0; // Toujours centrée
+        if (this.healthBarBack) {
+            this.healthBarBack.scaling.x = percent;
+            this.healthBarBack.position.x = 0; // Toujours centrée
+        }
     }
 
     private static getRandomSpawnPoint(level: number, spawnPositionNumber: number): BABYLON.Vector3 | null {
@@ -289,6 +352,8 @@ export class Enemy {
             return;
         }
 
+        // Ne pas faire de lookAt, la barre reste dans l'espace local de l'ennemi
+
         if (this.waypoints && this.waypoints.length > 0) {
             const target = this.waypoints[this.currentWaypointIndex];
             if (target == null) return;
@@ -313,6 +378,8 @@ export class Enemy {
         this.health -= amount;
         console.log(`⚠️ Ennemi touché ! HP restant : ${this.health}`);
 
+        this.updateHealthBar(); // Met à jour la barre de vie
+
         if (this.health <= 0) {
             this.destroy();
         }
@@ -322,6 +389,9 @@ export class Enemy {
         // Clear the update interval when the enemy is destroyed
         clearInterval(this.updateInterval);
         deleteEnemey(this);
+        if (this.healthBar) this.healthBar.dispose();
+        if (this.healthBarBack) this.healthBarBack.dispose();
+        if (this.healthBarBg) this.healthBarBg.dispose();
         this.mesh.dispose();
         WaveManager.getInstance().isWaveComplete();
         console.log("enemy supprimer de la liste");

@@ -1,10 +1,11 @@
-import { Turret } from "./Turret";
+import { GardenTreeTurret, SnowTreeTurret, Turret } from "./Turret";
 
 export class ObjectManager {
     private scene: BABYLON.Scene;
     private objectTypes: { [key: string]: { size: number; color: BABYLON.Color3 } } = {
-        greenBox: { size: 3, color: BABYLON.Color3.Green() },
-        turret: { size: 3, color: BABYLON.Color3.Gray() },
+
+        garden_turret: { size: 3, color: BABYLON.Color3.Gray() },
+        snow_turret: { size: 1, color: BABYLON.Color3.White() },
         // Add more object types here as needed
     };
 
@@ -20,9 +21,11 @@ export class ObjectManager {
         const objectConfig = this.getObjectConfig(objectType);
         if (!objectConfig) return;
 
-        if (objectType === "turret") {
-            new Turret(this.scene, position, 30, 50, 2000);
-        } else {
+        if (objectType === "garden_turret") {
+            new GardenTreeTurret(this.scene, position, 30, 50, 2000);
+        } else  if (objectType === "snow_turret") {
+            new SnowTreeTurret(this.scene, position, 30, 50, 2000);
+        } else{
             const object = BABYLON.MeshBuilder.CreateBox(objectType, { size: objectConfig.size }, this.scene);
             object.position = position;
             object.material = new BABYLON.StandardMaterial("objectMat", this.scene);

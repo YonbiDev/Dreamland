@@ -1,48 +1,39 @@
 import { enemies } from "./GlobalState";
-import { Projectile } from "./Projectile";
+import { Projectile, SnowBallProjectile, StarProjectile } from "./Projectile";
 import { ModelLoader } from "./ModelLoader";
 
-export class Turret {
+// Classe de base abstraite pour les tourelles
+export abstract class Turret {
     mesh: BABYLON.Mesh;
-    range: number; 
+    range: number;
     scene: BABYLON.Scene;
     target: BABYLON.Mesh | null = null;
-    fireRate: number;// Time in milliseconds between shots
+    fireRate: number;
     lastShotTime: number = 0;
-    projectileSpeed: number; // Speed of the projectiles fired by this turret
+    projectileSpeed: number;
 
-    constructor(scene: BABYLON.Scene, position: BABYLON.Vector3, range: number = 10, projectileSpeed: number = 30,fireRate: number = 1000) {
+    constructor(scene: BABYLON.Scene, position: BABYLON.Vector3, range: number = 10, projectileSpeed: number = 30, fireRate: number = 1000) {
         this.scene = scene;
         this.range = range;
-        this.projectileSpeed = projectileSpeed; // Initialize projectile speed
-        this.fireRate = fireRate; // Initialize fire rate
+        this.projectileSpeed = projectileSpeed;
+        this.fireRate = fireRate;
 
-        ModelLoader.loadModel(scene, "garden_tree_2", (result) => {
-            this.mesh = result.meshes[0] as BABYLON.Mesh;
-            this.mesh.position = position;
-            this.mesh.scaling = new BABYLON.Vector3(2, 2, 2); // Adjust scale as needed
+        this.loadModel(position);
 
-            // Add sprite sheet animation
-           // const spriteManager = new BABYLON.SpriteManager("spriteManager", "pipo-mapeffect013a.png", 1, { width: 400, height: 400 }, this.scene);
-         /*   const sprite = new BABYLON.Sprite("effect", spriteManager);
-            sprite.position = new BABYLON.Vector3(position.x, position.y+3, position.z); // Position below the turret
-            sprite.playAnimation(0, 9, true, 100); // Play frames 0 to 15 in a loop with 100ms per frame
-            sprite.size = 20; // Adjust size as needed 
-        */
-        });
-
-        // Vérifier les ennemis toutes les 500ms
         setInterval(() => {
             this.findTarget();
         }, 500);
     }
+
+    // Méthode abstraite à implémenter dans les sous-classes pour charger le modèle
+    abstract loadModel(position: BABYLON.Vector3): void;
 
     findTarget() {
         this.target = null;
         let closestDist = this.range;
 
         enemies.forEach(enemy => {
-            if (enemy.mesh) { // Ensure the enemy is valid
+            if (enemy.mesh) {
                 const distance = BABYLON.Vector3.Distance(this.mesh.position, enemy.mesh.position);
                 if (distance < closestDist) {
                     closestDist = distance;
@@ -57,11 +48,41 @@ export class Turret {
         }
     }
 
-    shoot() {
-        const now = Date.now();
+abstract shoot(): void;
+}
+
+// Tourelle de type garden_tree_2
+export class GardenTreeTurret extends Turret {
+    shoot(): void {
+          const now = Date.now();
         if (now - this.lastShotTime > this.fireRate) {
-            new Projectile(this.scene, this.mesh.position.clone(), this.target!, this.projectileSpeed); // Pass projectile speed
+            new StarProjectile(this.scene, this.mesh.position.clone(), this.target!, this.projectileSpeed);
             this.lastShotTime = now;
         }
+    }
+    loadModel(position: BABYLON.Vector3): void {
+        ModelLoader.loadModel(this.scene, "garden_tree_2", (result) => {
+            this.mesh = result.meshes[0] as BABYLON.Mesh;
+            this.mesh.position = position;
+            this.mesh.scaling = new BABYLON.Vector3(2, 2, 2);
+        });
+    }
+}
+
+// Tourelle de type snow_tree
+export class SnowTreeTurret extends Turret {
+    shoot(): void {
+          const now = Date.now();
+        if (now - this.lastShotTime > this.fireRate) {
+            new SnowBallProjectile(this.scene, this.mesh.position.clone(), this.target!, this.projectileSpeed);
+            this.lastShotTime = now;
+        }
+    }
+    loadModel(position: BABYLON.Vector3): void {
+        ModelLoader.loadModel(this.scene, "snow_tree", (result) => {
+            this.mesh = result.meshes[0] as BABYLON.Mesh;
+            this.mesh.position = position;
+            this.mesh.scaling = new BABYLON.Vector3(2, 2, 2);
+        });
     }
 }

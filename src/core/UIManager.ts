@@ -60,24 +60,33 @@ export class UIManager {
         uiContainer.style.boxShadow = "0 4px 12px rgba(0, 0, 0, 0.15)";
         document.body.appendChild(uiContainer);
 
-        // Add placeholders for objects
-        this.createPlaceholder(uiContainer, "turret", ASSET_BASE_URL + "Turret1Image.png", "Turret", `
+        // GardenTreeTurret (Tourelle 1)
+        this.createPlaceholder(uiContainer, "garden_turret", ASSET_BASE_URL + "Turret1Image.png", "garden_turret", `
         <div style="text-align: left;">
-    <strong style="font-size: 14px; color: #4CAF50;">Tourelle</strong><br>
-    <span style="font-size: 12px;">Portée : <strong>30</strong></span><br>
-    <span style="font-size: 12px;">Vitesse d'attaque : <strong>2s</strong></span><br>
-    <span style="font-size: 12px;">Vitesse du projectile : <strong>50</strong></span><br>
-    <span style="font-size: 12px; color: #FFD700;">Prix : <strong>5 Éclats de Rêves</strong></span>
-</div>
+            <strong style="font-size: 14px; color: #4CAF50;">Tourelle Arbre</strong><br>
+            <span style="font-size: 12px;">Portée : <strong>30</strong></span><br>
+            <span style="font-size: 12px;">Vitesse d'attaque : <strong>2s</strong></span><br>
+            <span style="font-size: 12px;">Vitesse du projectile : <strong>50</strong></span><br>
+            <span style="font-size: 12px; color: #FFD700;">Prix : <strong>5 Éclats de Rêves</strong></span><br>
+            <span style="font-size: 12px; color: #4CAF50;">Rôle : Inflige des dégâts directs aux ennemis.</span><br>
+            <span style="font-size: 11px; color: #bbb;">Astuce : Placez-la près des virages pour maximiser les tirs.</span>
+        </div>
         `);
 
-        this.createPlaceholder(uiContainer, "placeholder2", ASSET_BASE_URL + "Placeholder2Image.png", "Placeholder 2", `
-            <div style="text-align: left;">
-                <strong style="font-size: 14px; color: #FF9800;">Placeholder 2</strong><br>
-                <span style="font-size: 12px;">Coming Soon...</span>
-            </div>
+        // SnowTreeTurret (Tourelle 2)
+        this.createPlaceholder(uiContainer, "snow_turret", ASSET_BASE_URL + "Turret2Image.png", "Snow Turret", `
+        <div style="text-align: left;">
+            <strong style="font-size: 14px; color: #2196F3;">Tourelle Neige</strong><br>
+            <span style="font-size: 12px;">Portée : <strong>30</strong></span><br>
+            <span style="font-size: 12px;">Vitesse d'attaque : <strong>2s</strong></span><br>
+            <span style="font-size: 12px;">Vitesse du projectile : <strong>30</strong></span><br>
+            <span style="font-size: 12px; color: #FFD700;">Prix : <strong>10 Éclats de Rêves</strong></span><br>
+            <span style="font-size: 12px; color: #2196F3;">Rôle : Ralentit les ennemis touchés.</span><br>
+            <span style="font-size: 11px; color: #bbb;">Astuce : Combinez-la avec d'autres tourelles pour plus d'efficacité.</span>
+        </div>
         `);
 
+        // Placeholder 3 (Coming soon)
         this.createPlaceholder(uiContainer, "placeholder3", ASSET_BASE_URL + "Placeholder3Image.png", "Placeholder 3", `
             <div style="text-align: left;">
                 <strong style="font-size: 14px; color: #FF5722;">Placeholder 3</strong><br>
@@ -365,25 +374,37 @@ private addMouseTrailEffect(): void {
         const objectConfig = this.objectManager.getObjectConfig(objectType);
         if (!objectConfig) return;
 
-        if (objectType === "turret") {
-            const turretCost = 5; // Cost of a turret
+        // Définir le coût selon le type de tourelle
+        let turretCost = 0;
+        let modelName = "";
+        let previewScale = new BABYLON.Vector3(2, 2, 2);
+
+        if (objectType === "garden_turret") {
+            turretCost = 5;
+            modelName = "garden_tree_2";
+        } else if (objectType === "snow_turret") {
+            turretCost = 10;
+            modelName = "snow_tree";
+        }
+
+        if (objectType === "garden_turret" || objectType === "snow_turret") {
             if (this.game.getCoins() < turretCost) {
-                this.showTemporaryText("Pas assez de pièces!", 2000); // Show error message in French
+                this.showTemporaryText("Pas assez de pièces!", 2000);
                 return;
             }
         }
 
         this.isPlacingObject = true;
 
-        if (objectType === "turret") {
-            ModelLoader.loadModel(this.scene, "garden_tree_2", (result) => {
+        if (objectType === "garden_turret" || objectType === "snow_turret") {
+            ModelLoader.loadModel(this.scene, modelName, (result) => {
                 this.previewMesh = result.meshes[0] as BABYLON.Mesh;
-                this.previewMesh.name = `preview_${objectType}`; // Set the correct name
-                this.previewMesh.scaling = new BABYLON.Vector3(2, 2, 2); // Adjust scale as needed
+                this.previewMesh.name = `preview_${objectType}`;
+                this.previewMesh.scaling = previewScale;
 
                 // Configure material for transparency
                 const previewMaterial = new BABYLON.StandardMaterial("previewMat", this.scene);
-                previewMaterial.alpha = 0.3; // Set lower alpha for transparency
+                previewMaterial.alpha = 0.3;
                 previewMaterial.transparencyMode = BABYLON.Material.MATERIAL_ALPHABLEND;
                 this.previewMesh.material = previewMaterial;
 
@@ -429,11 +450,8 @@ private addMouseTrailEffect(): void {
         this.scene.onPointerDown = (evt, pickResult) => {
             if (evt.button === 2) { // Right-click to cancel placement
                 if (this.isPlacingObject && this.previewMesh) {
-                    const objectType = this.previewMesh.name.replace("preview_", ""); // Extract object type
-                    if (objectType === "turret") {
-                        const turretCost = 5; // Cost of a turret
-                        //this.game.increaseCoins(turretCost); // Refund the cost
-                    }
+                    const objectType = this.previewMesh.name.replace("preview_", "");
+                    // Pas de remboursement ici, mais logique possible à ajouter
 
                     // Dispose of the preview mesh and range indicator
                     this.previewMesh.dispose();
@@ -445,9 +463,9 @@ private addMouseTrailEffect(): void {
                     }
 
                     this.isPlacingObject = false;
-                    this.showTemporaryText("Placement annulé!", 2000); // Notifier l'annulation en français
+                    this.showTemporaryText("Placement annulé!", 2000);
                 }
-                return; // Prevent further processing for right-click
+                return;
             }
 
             if (!pickResult.pickedMesh) {
@@ -462,14 +480,19 @@ private addMouseTrailEffect(): void {
             const isGround = pickResult.pickedMesh.name === "Ground";
 
             if (isGround && isPositionFree && this.previewMesh) {
-                const objectType = this.previewMesh.name.replace("preview_", ""); // Extract object type
-                if (objectType === "turret") {
-                    const turretCost = 5; // Cost of a turret
-                    this.game.decreaseCoins(turretCost); // Deduct the cost when placed
+                const objectType = this.previewMesh.name.replace("preview_", "");
+                let turretCost = 0;
+                if (objectType === "garden_turret") {
+                    turretCost = 5;
+                } else if (objectType === "snow_turret") {
+                    turretCost = 10;
+                }
+                if (objectType === "garden_turret" || objectType === "snow_turret") {
+                    this.game.decreaseCoins(turretCost);
                 }
 
-                snappedPosition.y += 0; // Adjust the Y position to place the object above the ground
-                console.log(`Création d'un objet de type : ${objectType} à la position : ${snappedPosition}`); // Journal en français
+                snappedPosition.y += 0;
+                console.log(`Création d'un objet de type : ${objectType} à la position : ${snappedPosition}`);
                 this.objectManager.createObject(objectType, snappedPosition);
 
                 // Dispose of the preview mesh and range indicator, and reset placement state

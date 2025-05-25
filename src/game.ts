@@ -19,7 +19,7 @@ export class Game {
     private scene: BABYLON.Scene;
     private canvas: HTMLCanvasElement;
     private uiManager: UIManager;
-    private coins: number = 5; // Initialize with 5 coins
+    private coins: number = 10; // Initialize with 5 coins
 
     static health: number = 10;
 
@@ -78,7 +78,7 @@ export class Game {
         skyboxMaterial.reflectionTexture.coordinatesMode = BABYLON.Texture.SKYBOX_MODE;
 
         skybox.material = skyboxMaterial;
-      const waypointEditor = new WaypointEditor(this.scene);
+      //const waypointEditor = new WaypointEditor(this.scene);
         // Enable the waypoint editor in development mode
         if (process.env.NODE_ENV === "development") {
             // const waypointEditor = new WaypointEditor(this.scene);
