@@ -10,7 +10,7 @@ module.exports = {
     output: {
         filename: "app.js",
         path: path.resolve(appDirectory, "dist"),
-        publicPath: "/", // important pour charger les assets
+        publicPath: "/Dreamland/", // 👈 important pour GitHub Pages
         clean: true,
     },
     resolve: {
