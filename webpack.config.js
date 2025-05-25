@@ -49,5 +49,5 @@ module.exports = {
         }),
     ],
     //mode: "development", // ⛔️ pas production pour le dev
-     mode: "production",
+    mode: "production",
 };

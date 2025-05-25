@@ -1,6 +1,7 @@
 import { deleteEnemey, Game, getEnemies } from "../game";
 import { ModelLoader } from "./ModelLoader";
 import { WaveManager } from "./WaveManager";
+import { WaypointManager } from "./WaypointManager";
 
 export class Enemy {
     mesh: BABYLON.Mesh;
@@ -17,8 +18,21 @@ export class Enemy {
         this.scene = scene;
         this.health = health;
 
-        // Load waypoints for the given level and spawn label
-        this.waypoints = this.loadRandomWaypoints(level, spawnLabel);
+        // Load waypoints for the given level and spawn label from JSON
+        const key = `level${level}_spawnpoint${spawnLabel}`;
+        WaypointManager.loadFromFile(key).then(({ waypoints }) => {
+            if (waypoints && waypoints.length > 0) {
+                const randomListIndex = Math.floor(Math.random() * waypoints.length);
+                this.waypoints = waypoints[randomListIndex].map(wp => wp.clone());
+                // Start moving only after waypoints are loaded
+                if (this.mesh) {
+                    this.moveToNextWaypoint();
+                }
+            } else {
+                this.waypoints = [];
+                console.error(`No waypoints found for ${key}`);
+            }
+        });
 
         // Load the "Slime_01_MeltalHelmet.glb" model
         ModelLoader.loadModel(scene, modelName, result => {
@@ -31,7 +45,10 @@ export class Enemy {
             // Add particle system for walking effect
             this.addWalkingParticleEffect();
 
-            this.moveToNextWaypoint();
+            // If waypoints are already loaded, start moving
+            if (this.waypoints && this.waypoints.length > 0) {
+                this.moveToNextWaypoint();
+            }
         });
 
         // Start the update loop for this enemy
@@ -129,6 +146,47 @@ export class Enemy {
         }
 
         return new Enemy(scene, "", spawnPoint, 10, level.toString(), spawnPositionNumber.toString());
+    }
+
+    static async loadMapFromJsonFile(file: File): Promise<{ waypoints: BABYLON.Vector3[][], spawns: BABYLON.Vector3[] }> {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = (evt) => {
+                try {
+                    const data = JSON.parse(evt.target!.result as string);
+                    const waypoints: BABYLON.Vector3[][] = Object.keys(data)
+                        .filter(k => k.startsWith("waypoint"))
+                        .map(k => data[k].map((wp: any) => new BABYLON.Vector3(wp.x, wp.y, wp.z)));
+                    const spawns: BABYLON.Vector3[] = data.spawns
+                        ? data.spawns.map((sp: any) => new BABYLON.Vector3(sp.x, sp.y, sp.z))
+                        : [];
+                    resolve({ waypoints, spawns });
+                } catch (err) {
+                    reject(err);
+                }
+            };
+            reader.onerror = reject;
+            reader.readAsText(file);
+        });
+    }
+
+    // Méthode utilitaire pour charger une map depuis un chemin (fetch)
+    static async loadMapFromServer(key: string): Promise<{ waypoints: BABYLON.Vector3[][], spawns: BABYLON.Vector3[] }> {
+        return WaypointManager.loadFromFile(key);
+    }
+
+    // Utilisez cette méthode pour obtenir un spawn aléatoire depuis une map JSON
+    static getRandomSpawnFromMap(spawns: BABYLON.Vector3[]): BABYLON.Vector3 | null {
+        if (!spawns || spawns.length === 0) return null;
+        const randomIndex = Math.floor(Math.random() * spawns.length);
+        return spawns[randomIndex];
+    }
+
+    // Utilisez cette méthode pour obtenir une liste de waypoints aléatoire depuis une map JSON
+    static getRandomWaypointsFromMap(waypoints: BABYLON.Vector3[][]): BABYLON.Vector3[] {
+        if (!waypoints || waypoints.length === 0) return [];
+        const randomListIndex = Math.floor(Math.random() * waypoints.length);
+        return waypoints[randomListIndex];
     }
 
     loadRandomWaypoints(level: string, spawnLabel: string): BABYLON.Vector3[] {
