@@ -88,7 +88,7 @@ public async startWave(): Promise<void> {
                 const spawnPosition = this.spawnPositions[0].clone();
 
                 // Add spawn effect using sprite sheet
-                const spriteManager = new BABYLON.SpriteManager("spawnEffectManager", "assets/spawnEffectEnemy.png", 14, { width: 0, height: 0 }, this.scene);
+                const spriteManager = new BABYLON.SpriteManager("spawnEffectManager", "assets/spawnEffectEnemy.PNG", 14, { width: 0, height: 0 }, this.scene);
                 const sprite = new BABYLON.Sprite("spawnEffect", spriteManager);
                 sprite.position = spawnPosition.clone();
                 sprite.playAnimation(0, 14, false, 50);
