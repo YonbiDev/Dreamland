@@ -1,5 +1,5 @@
 import { enemies } from "./GlobalState";
-import { Projectile, SnowBallProjectile, StarProjectile } from "./Projectile";
+import { MushroomBombProjectile, Projectile, SnowBallProjectile, StarProjectile } from "./Projectile";
 import { ModelLoader } from "./ModelLoader";
 
 // Classe de base abstraite pour les tourelles
@@ -80,6 +80,24 @@ export class SnowTreeTurret extends Turret {
     }
     loadModel(position: BABYLON.Vector3): void {
         ModelLoader.loadModel(this.scene, "snow_tree", (result) => {
+            this.mesh = result.meshes[0] as BABYLON.Mesh;
+            this.mesh.position = position;
+            this.mesh.scaling = new BABYLON.Vector3(2, 2, 2);
+        });
+    }
+}
+
+// Tourelle de type mushroom_tree
+export class MushroomTreeTurret extends Turret {
+    shoot(): void {
+        const now = Date.now();
+        if (now - this.lastShotTime > this.fireRate) {
+            new MushroomBombProjectile(this.scene, this.mesh.position.clone(), this.target!, this.projectileSpeed);
+            this.lastShotTime = now;
+        }
+    }
+    loadModel(position: BABYLON.Vector3): void {
+        ModelLoader.loadModel(this.scene, "mushroom_tree", (result) => {
             this.mesh = result.meshes[0] as BABYLON.Mesh;
             this.mesh.position = position;
             this.mesh.scaling = new BABYLON.Vector3(2, 2, 2);

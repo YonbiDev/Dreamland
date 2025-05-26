@@ -1,4 +1,4 @@
-import { GardenTreeTurret, SnowTreeTurret, Turret } from "./Turret";
+import { GardenTreeTurret, MushroomTreeTurret, SnowTreeTurret, Turret } from "./Turret";
 
 export class ObjectManager {
     private scene: BABYLON.Scene;
@@ -6,6 +6,7 @@ export class ObjectManager {
 
         garden_turret: { size: 3, color: BABYLON.Color3.Gray() },
         snow_turret: { size: 1, color: BABYLON.Color3.White() },
+        mushroom_tree: { size: 2, color: BABYLON.Color3.Red() },
         // Add more object types here as needed
     };
 
@@ -24,7 +25,9 @@ export class ObjectManager {
         if (objectType === "garden_turret") {
             new GardenTreeTurret(this.scene, position, 30, 50, 2000);
         } else  if (objectType === "snow_turret") {
-            new SnowTreeTurret(this.scene, position, 30, 50, 2000);
+            new SnowTreeTurret(this.scene, position, 30, 50, 3000);
+        } else  if (objectType === "mushroom_tree") {
+            new MushroomTreeTurret(this.scene, position, 30, 60, 4000);
         } else{
             const object = BABYLON.MeshBuilder.CreateBox(objectType, { size: objectConfig.size }, this.scene);
             object.position = position;

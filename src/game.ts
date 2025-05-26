@@ -19,7 +19,7 @@ export class Game {
     private scene: BABYLON.Scene;
     private canvas: HTMLCanvasElement;
     private uiManager: UIManager;
-    private coins: number = 10; // Initialize with 5 coins
+    private coins: number = 15; // Initialize with 5 coins
 
     static health: number = 10;
 

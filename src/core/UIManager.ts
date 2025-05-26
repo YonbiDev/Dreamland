@@ -65,8 +65,8 @@ export class UIManager {
         <div style="text-align: left;">
             <strong style="font-size: 14px; color: #4CAF50;">Tourelle Arbre</strong><br>
             <span style="font-size: 12px;">Portée : <strong>30</strong></span><br>
-            <span style="font-size: 12px;">Vitesse d'attaque : <strong>2s</strong></span><br>
             <span style="font-size: 12px;">Vitesse du projectile : <strong>50</strong></span><br>
+            <span style="font-size: 12px;">Vitesse d'attaque : <strong>2000ms</strong></span><br>
             <span style="font-size: 12px; color: #FFD700;">Prix : <strong>5 Éclats de Rêves</strong></span><br>
             <span style="font-size: 12px; color: #4CAF50;">Rôle : Inflige des dégâts directs aux ennemis.</span><br>
             <span style="font-size: 11px; color: #bbb;">Astuce : Placez-la près des virages pour maximiser les tirs.</span>
@@ -78,21 +78,27 @@ export class UIManager {
         <div style="text-align: left;">
             <strong style="font-size: 14px; color: #2196F3;">Tourelle Neige</strong><br>
             <span style="font-size: 12px;">Portée : <strong>30</strong></span><br>
-            <span style="font-size: 12px;">Vitesse d'attaque : <strong>2s</strong></span><br>
-            <span style="font-size: 12px;">Vitesse du projectile : <strong>30</strong></span><br>
+            <span style="font-size: 12px;">Vitesse du projectile : <strong>50</strong></span><br>
+            <span style="font-size: 12px;">Vitesse d'attaque : <strong>3000ms</strong></span><br>
             <span style="font-size: 12px; color: #FFD700;">Prix : <strong>10 Éclats de Rêves</strong></span><br>
             <span style="font-size: 12px; color: #2196F3;">Rôle : Ralentit les ennemis touchés.</span><br>
             <span style="font-size: 11px; color: #bbb;">Astuce : Combinez-la avec d'autres tourelles pour plus d'efficacité.</span>
         </div>
         `);
 
-        // Placeholder 3 (Coming soon)
-        this.createPlaceholder(uiContainer, "placeholder3", ASSET_BASE_URL + "Placeholder3Image.png", "Placeholder 3", `
-            <div style="text-align: left;">
-                <strong style="font-size: 14px; color: #FF5722;">Placeholder 3</strong><br>
-                <span style="font-size: 12px;">Coming Soon...</span>
-            </div>
+        // MushroomTreeTurret (Tourelle 3)
+        this.createPlaceholder(uiContainer, "mushroom_tree", ASSET_BASE_URL + "MushroomTreeImage.png", "Mushroom Tree", `
+        <div style="text-align: left;">
+            <strong style="font-size: 14px; color: #8D5C2B;">Tourelle Champignon</strong><br>
+            <span style="font-size: 12px;">Portée : <strong>30</strong></span><br>
+            <span style="font-size: 12px;">Vitesse du projectile : <strong>60</strong></span><br>
+            <span style="font-size: 12px;">Vitesse d'attaque : <strong>4000ms</strong></span><br>
+            <span style="font-size: 12px; color: #FFD700;">Prix : <strong>15 Éclats de Rêves</strong></span><br>
+            <span style="font-size: 12px; color: #8D5C2B;">Rôle : Explose et inflige des dégâts de zone aux ennemis proches.</span><br>
+            <span style="font-size: 11px; color: #bbb;">Astuce : Placez-la là où les ennemis sont regroupés.</span>
+        </div>
         `);
+
 
         // Add coin display container
         const coinContainer = document.createElement("div");
@@ -385,9 +391,13 @@ private addMouseTrailEffect(): void {
         } else if (objectType === "snow_turret") {
             turretCost = 10;
             modelName = "snow_tree";
+        } else if (objectType === "mushroom_tree") {
+            turretCost = 15;
+            modelName = "mushroom_tree";
+            previewScale = new BABYLON.Vector3(2, 2, 2);
         }
 
-        if (objectType === "garden_turret" || objectType === "snow_turret") {
+        if (objectType === "garden_turret" || objectType === "snow_turret" || objectType === "mushroom_tree") {
             if (this.game.getCoins() < turretCost) {
                 this.showTemporaryText("Pas assez de pièces!", 2000);
                 return;
@@ -396,7 +406,7 @@ private addMouseTrailEffect(): void {
 
         this.isPlacingObject = true;
 
-        if (objectType === "garden_turret" || objectType === "snow_turret") {
+        if (objectType === "garden_turret" || objectType === "snow_turret" || objectType === "mushroom_tree") {
             ModelLoader.loadModel(this.scene, modelName, (result) => {
                 this.previewMesh = result.meshes[0] as BABYLON.Mesh;
                 this.previewMesh.name = `preview_${objectType}`;
@@ -411,7 +421,11 @@ private addMouseTrailEffect(): void {
                 this.previewMesh.isPickable = false;
 
                 // Create a range indicator for the turret
-                this.rangeIndicator = BABYLON.MeshBuilder.CreateSphere("rangeIndicator", { diameter: 60, segments: 16 }, this.scene);
+                let rangeDiameter = 60;
+                if (objectType === "mushroom_tree") {
+                    rangeDiameter = 40; // Zone d'effet plus petite pour le champignon
+                }
+                this.rangeIndicator = BABYLON.MeshBuilder.CreateSphere("rangeIndicator", { diameter: rangeDiameter, segments: 16 }, this.scene);
                 this.rangeIndicator.material = new BABYLON.StandardMaterial("rangeMat", this.scene);
                 (this.rangeIndicator.material as BABYLON.StandardMaterial).alpha = 0.2;
                 (this.rangeIndicator.material as BABYLON.StandardMaterial).diffuseColor = new BABYLON.Color3(1, 1, 1);
@@ -486,8 +500,10 @@ private addMouseTrailEffect(): void {
                     turretCost = 5;
                 } else if (objectType === "snow_turret") {
                     turretCost = 10;
+                } else if (objectType === "mushroom_tree") {
+                    turretCost = 15;
                 }
-                if (objectType === "garden_turret" || objectType === "snow_turret") {
+                if (objectType === "garden_turret" || objectType === "snow_turret" || objectType === "mushroom_tree") {
                     this.game.decreaseCoins(turretCost);
                 }
 
