@@ -10,17 +10,9 @@
 
 ---
 
-## 🌐 Accès au Projet et au Jeu
-
-### 📁 Code Source sur GitHub  
-Plonge dans les coulisses du développement !  
-🔗 [Voir le dépôt Dreamland sur GitHub](https://github.com/YonbiDev/Dreamland)
-
----
-
 ### 📄 Documentation Officielle  
 Retrouve toutes les infos techniques du jeu : mécanique, architecture, astuces de développement...  
-📘 [Lire la documentation](https://github.com/gamesonweb/dreamland-YonbiDev/blob/main/DOCUMENTATION.md)
+📘 [Lire la documentation](https://github.com/YonbiDev/Dreamland/blob/main/DOCUMENTATION.md)
 
 ---
 
