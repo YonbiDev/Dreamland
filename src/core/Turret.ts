@@ -12,7 +12,7 @@ export abstract class Turret {
     lastShotTime: number = 0;
     projectileSpeed: number;
 
-    constructor(scene: BABYLON.Scene, position: BABYLON.Vector3, range: number = 10, projectileSpeed: number = 30, fireRate: number = 1000) {
+    constructor(scene: BABYLON.Scene, position: BABYLON.Vector3, range: number , projectileSpeed: number = 30, fireRate: number = 1000) {
         this.scene = scene;
         this.range = range;
         this.projectileSpeed = projectileSpeed;

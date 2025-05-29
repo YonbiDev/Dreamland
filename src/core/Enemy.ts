@@ -1,4 +1,5 @@
 import { deleteEnemey, Game, getEnemies } from "../game";
+import { UIManager } from "./UIManager"; // Ajouté pour accéder à l'UI
 import { ModelLoader } from "./ModelLoader";
 import { WaveManager } from "./WaveManager";
 import { WaypointManager } from "./WaypointManager";
@@ -287,9 +288,9 @@ export class Enemy {
 
     protected moveToNextWaypoint(): void {
         if (this.currentWaypointIndex >= this.waypoints.length) {
-              console.log("Enemy reached the last waypoint. Decreasing health.");
-                    this.scene.getEngine().getRenderingCanvas()?.dispatchEvent(new CustomEvent("enemyReachedEnd"));
-                    this.destroy();
+            console.log("Enemy reached the last waypoint. Decreasing health.");
+            this.scene.getEngine().getRenderingCanvas()?.dispatchEvent(new CustomEvent("enemyReachedEnd"));
+            this.destroy(false); // Ne pas donner de récompense
             return; // Stop moving if no more waypoints
         }
 
@@ -381,11 +382,16 @@ export class Enemy {
         this.updateHealthBar(); // Met à jour la barre de vie
 
         if (this.health <= 0) {
-            this.destroy();
+            this.destroy(true); // Donne la récompense
         }
     }
 
-    destroy() {
+    // Ajout : méthode pour obtenir la récompense en pièces
+    getReward(): number {
+        return 1; // Par défaut, 1 pièce
+    }
+
+    destroy(giveReward: boolean = true) {
         // Clear the update interval when the enemy is destroyed
         clearInterval(this.updateInterval);
         deleteEnemey(this);
@@ -393,47 +399,60 @@ export class Enemy {
         if (this.healthBarBack) this.healthBarBack.dispose();
         if (this.healthBarBg) this.healthBarBg.dispose();
         this.mesh.dispose();
+        // Ajout : donner la récompense au joueur
+        if (giveReward) {
+            const reward = this.getReward();
+            if (reward > 0) {
+                const ui = UIManager.getInstance();
+                Game.getInstance().increaseCoins(reward);
+                ui.showCoinGainAnimation(reward); // Animation de gain
+            }
+        }
         WaveManager.getInstance().isWaveComplete();
         console.log("enemy supprimer de la liste");
     }
 }
 
+// Spécialisation des récompenses pour chaque type d'ennemi
 export class Slime extends Enemy {
     constructor(scene: BABYLON.Scene, position: BABYLON.Vector3, level: string, spawnLabel: string) {
-        super(scene, "Slime_03", position, 10, level, spawnLabel); // Slime has 10 HP by default
-        this.speed = 10; // Slime-specific speed
-
+        super(scene, "Slime_03", position, 10, level, spawnLabel);
+        this.speed = 10;
+    }
+    getReward(): number {
+        return 2; // Slime donne 2 pièces
     }
 }
 
-
 export class Knight extends Enemy {
     constructor(scene: BABYLON.Scene, position: BABYLON.Vector3, level: string, spawnLabel: string) {
-        super(scene, "Slime_01_MeltalHelmet", position, 20, level, spawnLabel); // Viking has 20 HP by default
-        this.speed = 5; // Viking-specific speed
-
-
+        super(scene, "Slime_01_MeltalHelmet", position, 20, level, spawnLabel);
+        this.speed = 10;
+    }
+    getReward(): number {
+        return 2; // Knight donne 5 pièces
     }
 }
 
 export class Viking extends Enemy {
     constructor(scene: BABYLON.Scene, position: BABYLON.Vector3, level: string, spawnLabel: string) {
-        super(scene, "Slime_01_Viking", position, 20, level, spawnLabel); // Viking has 20 HP by default
-        this.speed = 10; // Viking-specific speed
-
+        super(scene, "Slime_01_Viking", position, 20, level, spawnLabel);
+        this.speed = 12;
     }
-    
-
-    // Override moveToNextWaypoint to add Viking-specific behavior
+    getReward(): number {
+        return 2; // Viking donne 7 pièces
+    }
     protected moveToNextWaypoint(): void {
-        //console.log("Viking is charging towards the next waypoint!");
         super.moveToNextWaypoint();
     }
 }
+
 export class Attacker extends Enemy {
     constructor(scene: BABYLON.Scene, position: BABYLON.Vector3, level: string, spawnLabel: string) {
-        super(scene, "Slime_03 Leaf", position, 20, level, spawnLabel); // Viking has 20 HP by default
-        this.speed = 10; // Viking-specific speed
-
+        super(scene, "Slime_03 Leaf", position, 20, level, spawnLabel);
+        this.speed = 15;
+    }
+    getReward(): number {
+        return 2; // Attacker donne 10 pièces
     }
 }

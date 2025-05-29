@@ -1,6 +1,3 @@
-
-
-
 export class CameraController {
     constructor(scene: BABYLON.Scene, canvas: HTMLCanvasElement) {
      /*   const camera = new BABYLON.FreeCamera("AgeOfEmpiresCamera", new BABYLON.Vector3(0, 100, 50), scene);
@@ -24,7 +21,15 @@ export class CameraController {
 
         scene.activeCamera = camera;*/
 
-        const camera = new BABYLON.ArcRotateCamera("Camera", 3 * Math.PI / 2,0, 70, BABYLON.Vector3.Zero());
+        // 35 degrés en radians ≈ 0.6109
+        const initialBeta = 60 * Math.PI / 180;
+        const camera = new BABYLON.ArcRotateCamera("Camera", -30 * Math.PI / 180, initialBeta, 70, BABYLON.Vector3.Zero());
+        // Limites de zoom
+        camera.lowerRadiusLimit = 65;
+        camera.upperRadiusLimit = 150;
+        // Limites de rotation X (beta)
+        camera.lowerBetaLimit = 0.3;
+        camera.upperBetaLimit = 1.5;
         camera.attachControl(canvas, true);
     }
 }

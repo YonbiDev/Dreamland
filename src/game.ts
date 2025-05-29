@@ -3,7 +3,7 @@ import { CameraController } from "./core/CameraController";
 import { ModelLoader } from "./core/ModelLoader";
 import { Turret } from "./core/Turret";
 import { Enemy, Slime, Viking } from "./core/Enemy";
-import { UIManager } from "./core/UIManager";
+import { UIManager, UITutorial } from "./core/UIManager";
 import { WaypointEditor } from "./core/WaypointEditor";
 import { WaypointManager } from "./core/WaypointManager";
 import { WaveManager } from "./core/WaveManager";
@@ -19,10 +19,21 @@ export class Game {
     private scene: BABYLON.Scene;
     private canvas: HTMLCanvasElement;
     private uiManager: UIManager;
-    private coins: number = 15; // Initialize with 5 coins
+    private coins: number = 5; // Initialize with 5 coins
 
     static health: number = 10;
+    private static instance: Game | null = null;
+    uITutorial: UITutorial;
 
+    public static getInstance(scene?: BABYLON.Scene, canvas?: HTMLCanvasElement, game?: Game): Game {
+        if (!Game.instance) {
+            if (!scene || !canvas || !game) {
+                throw new Error("UIManager has not been initialized. Please provide scene, canvas, and game arguments.");
+            }
+            Game.instance = new Game();
+        }
+        return Game.instance;
+    }
 
     constructor() {
         this.canvas = document.getElementById("renderCanvas") as HTMLCanvasElement;
@@ -30,6 +41,7 @@ export class Game {
         this.scene = initializeScene(this.engine);
 
         this.init();
+        Game.instance = this;
     }
 
     private async init(): Promise<void> {
@@ -37,6 +49,8 @@ export class Game {
        
        
         this.uiManager = UIManager.getInstance(this.scene, this.canvas, this);
+      //  this.uITutorial = UITutorial.getInstance(this.uiManager);
+       // this.uITutorial.start();
 
         // Display initial coins
         this.uiManager.showTemporaryText(`Vous avez ${this.coins} éclats de rêves!`, 3000);
@@ -58,6 +72,7 @@ export class Game {
         const backgroundMusic = await BABYLON.CreateSoundAsync("backgroundMusic",
            ASSET_BASE_URL + "music.mp3"
         );
+        backgroundMusic.loop = true;
 
         // Wait until audio engine is ready to play sounds.
         await audioEngine.unlock();
@@ -87,6 +102,7 @@ export class Game {
         // Initialize the WaveManager
         waveManager = WaveManager.getInstance(this.scene,WaypointManager)
         waveManager.initWave("level1_spawnpoint1"); // Example wave start
+       // UIManager.getInstance().showPreparationPhaseAnimation();
 
         this.engine.runRenderLoop(() => {
             const deltaTime = this.engine.getDeltaTime() / 1000; // Convertir en secondes

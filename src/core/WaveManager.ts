@@ -1,22 +1,37 @@
-import { Enemy, Slime, Viking } from "./Enemy";
+import { Attacker, Enemy, Knight, Slime, Viking } from "./Enemy";
 import { WaypointManager } from "./WaypointManager";
 import { enemies } from "./GlobalState";
 import { UIManager } from "./UIManager";
+import { Game } from "../game"; // Ajout de l'import Game
 
 export class WaveManager {
     private scene: BABYLON.Scene;
     private waypointManager: typeof WaypointManager;
     private enemiesToSpawn: number;
     private spawnKey: string;
-    private totalWaves: number = 2; // Example total number of waves
-    private currentWave: number = 1; // Track the current wave
+    private totalWaves: number = 15; // Example total number of waves
+    public currentWave: number = 1; // Track the current wave
     private currentWaveEnemies: Enemy[] = []; // Track enemies of the current wave.
     private waveStarted: boolean = false;
     private spawnPositions: BABYLON.Vector3[] = []; // Store spawn positions for the current wav
-    private waveConfigurations: { [waveNumber: number]: string[] } = {
-        1: ["slime","knight"],
-        2: ["knight",]
-    };
+public waveConfigurations: { [waveNumber: number]: string[] } = {
+  1: ["slime"],
+  2: ["slime", "slime"],
+  3: ["slime", "knight"],
+  4: ["slime", "knight", "knight"],
+  5: ["slime", "knight", "viking", "viking"],
+  6: ["knight", "viking", "viking", "attacker"],
+  7: ["slime", "knight", "viking", "attacker", "attacker"],
+  8: ["knight", "knight", "viking", "viking", "attacker", "attacker"],
+  9: ["slime", "slime", "knight", "viking", "attacker", "attacker", "attacker"],
+  10: ["knight", "viking", "viking", "attacker", "attacker", "attacker", "attacker"],
+  11: ["slime", "knight", "viking", "viking", "attacker", "attacker", "attacker", "attacker"],
+  12: ["knight", "knight", "viking", "viking", "attacker", "attacker", "attacker", "attacker"],
+  13: ["slime", "knight", "viking", "viking", "attacker", "attacker", "attacker", "attacker", "attacker"],
+  14: ["knight", "knight", "viking", "viking", "viking", "attacker", "attacker", "attacker", "attacker"],
+  15: ["slime", "knight", "knight", "viking", "viking", "attacker", "attacker", "attacker", "attacker", "attacker"]
+};
+
 
     private static instance: WaveManager | null = null;
 
@@ -39,6 +54,7 @@ export class WaveManager {
 
    public async initWave(spawnKey: string): Promise<void> {
     const enemyTypes = this.waveConfigurations[this.currentWave];
+    UIManager.getInstance().setEnemyCount(this.waveConfigurations[this.currentWave].length);
     if (!enemyTypes) {
         console.warn(`No configuration found for wave ${this.currentWave}.`);
         return;
@@ -83,7 +99,11 @@ public async startWave(): Promise<void> {
         }
     }
 
-   for (let i = 0; i < enemyTypes.length; i++) {
+    // Affiche l'animation de début de vague
+    UIManager.getInstance().showWavePhase(this.currentWave);
+
+    setTimeout(() => {
+        for (let i = 0; i < enemyTypes.length; i++) {
             setTimeout(() => {
                 const spawnPosition = this.spawnPositions[0].clone();
 
@@ -104,7 +124,13 @@ public async startWave(): Promise<void> {
                         enemy = new Slime(this.scene, spawnPosition, "1", "1");
                         break;
                     case "knight":
+                        enemy = new Knight(this.scene, spawnPosition, "1", "1");
+                        break;
+                        case "viking":
                         enemy = new Viking(this.scene, spawnPosition, "1", "1");
+                        break;
+                        case "attacker":
+                        enemy = new Attacker(this.scene, spawnPosition, "1", "1");
                         break;
                     default:
                         console.warn(`Unknown enemy type: ${enemyTypes[i]}`);
@@ -121,21 +147,32 @@ public async startWave(): Promise<void> {
                 }
             }, i * 3000);
         }
-
         console.log(`Wave ${this.currentWave} started with ${enemyTypes.length} enemies.`);
-    
+    }, 1500); // Laisse le temps à l'animation wave de s'afficher
 }
 
     public isWaveComplete(): boolean {
         if (this.waveStarted && this.currentWaveEnemies.every(enemy => !enemy.mesh || enemy.mesh.isDisposed())) {
             this.waveStarted = false;
             this.currentWave++;
+            // Déblocage des tourelles selon la vague atteinte
+            if (this.currentWave === 3) {
+                UIManager.getInstance().unlockTurret("snow_turret");
+            }
+            if (this.currentWave === 5) {
+                UIManager.getInstance().unlockTurret("mushroom_tree");
+            }
+            // Animation "Wave Cleared"
+            UIManager.getInstance().showWaveClearedAnimation();
             UIManager.getInstance().showCinematicBars();
             UIManager.getInstance().showStartWaveButton();
-                console.log(`Wave ${this.currentWave} completed. Starting next wave...`);
+            UIManager.getInstance().setEnemyCount(this.waveConfigurations[this.currentWave]?.length ?? 0);
+            // Ajout : le joueur gagne 5 coins à la fin de chaque vague
+            Game.getInstance().increaseCoins(3);
+            console.log(`Wave ${this.currentWave} completed. Starting next wave...`);
 
-             if (this.areAllWavesComplete()) {
-               UIManager.getInstance().showVictoryMenu();// Show victory scene if all waves are complete
+            if (this.areAllWavesComplete()) {
+                UIManager.getInstance().showVictoryMenu();// Show victory scene if all waves are complete
             }
             return true;
         } else {
@@ -145,5 +182,12 @@ public async startWave(): Promise<void> {
 
     public areAllWavesComplete(): boolean {
         return this.currentWave > this.totalWaves;
+    }
+
+    // À appeler au début du jeu (ex: après l'initialisation du jeu ou de la scène)
+    public showPreparationAtGameStart(): void {
+        UIManager.getInstance().showCinematicBars();
+        UIManager.getInstance().showPreparationPhaseAnimation();
+        UIManager.getInstance().showStartWaveButton();
     }
 }

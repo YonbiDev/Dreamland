@@ -23,11 +23,11 @@ export class ObjectManager {
         if (!objectConfig) return;
 
         if (objectType === "garden_turret") {
-            new GardenTreeTurret(this.scene, position, 30, 50, 2000);
+            new GardenTreeTurret(this.scene, position, 15, 40, 2000);
         } else  if (objectType === "snow_turret") {
-            new SnowTreeTurret(this.scene, position, 30, 50, 3000);
+            new SnowTreeTurret(this.scene, position, 25, 35, 3000);
         } else  if (objectType === "mushroom_tree") {
-            new MushroomTreeTurret(this.scene, position, 30, 60, 4000);
+            new MushroomTreeTurret(this.scene, position, 25, 40, 4000);
         } else{
             const object = BABYLON.MeshBuilder.CreateBox(objectType, { size: objectConfig.size }, this.scene);
             object.position = position;
