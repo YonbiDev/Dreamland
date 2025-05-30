@@ -1,4 +1,4 @@
-import { Attacker, Enemy, Knight, Slime, Viking } from "./Enemy";
+import { SmallLeaf, Enemy, Knight, Slime,Bunny, Viking,Bigleaf,King ,BigKing} from "./Enemy";
 import { WaypointManager } from "./WaypointManager";
 import { enemies } from "./GlobalState";
 import { UIManager } from "./UIManager";
@@ -15,22 +15,42 @@ export class WaveManager {
     private waveStarted: boolean = false;
     private spawnPositions: BABYLON.Vector3[] = []; // Store spawn positions for the current wav
 public waveConfigurations: { [waveNumber: number]: string[] } = {
-  1: ["slime"],
-  2: ["slime", "slime"],
-  3: ["slime", "knight"],
-  4: ["slime", "knight", "knight"],
-  5: ["slime", "knight", "viking", "viking"],
-  6: ["knight", "viking", "viking", "attacker"],
-  7: ["slime", "knight", "viking", "attacker", "attacker"],
-  8: ["knight", "knight", "viking", "viking", "attacker", "attacker"],
-  9: ["slime", "slime", "knight", "viking", "attacker", "attacker", "attacker"],
-  10: ["knight", "viking", "viking", "attacker", "attacker", "attacker", "attacker"],
-  11: ["slime", "knight", "viking", "viking", "attacker", "attacker", "attacker", "attacker"],
-  12: ["knight", "knight", "viking", "viking", "attacker", "attacker", "attacker", "attacker"],
-  13: ["slime", "knight", "viking", "viking", "attacker", "attacker", "attacker", "attacker", "attacker"],
-  14: ["knight", "knight", "viking", "viking", "viking", "attacker", "attacker", "attacker", "attacker"],
-  15: ["slime", "knight", "knight", "viking", "viking", "attacker", "attacker", "attacker", "attacker", "attacker"]
+  1: ["slime"], // Wave 1 configuration
+  2: ["slime", "bunny"],
+  3: ["slime", "bunny", "bunny"],
+  4: ["slime","bunny","bunny", "bunny"],
+  5: ["knight", "bunny"],
+  6: ["knight", "knight", "bunny"],
+  7: ["knight", "bunny", "viking"],
+  8: ["viking", "knight", "bunny"],
+  9: ["viking", "viking", "knight", "bunny"],
+  10: ["viking", "viking", "bunny", "smallleaf"],
+  
+  11: ["viking", "viking", "smallleaf", "smallleaf"],
+  12: ["smallleaf", "smallleaf", "viking", "bigleaf"],
+  13: ["bigleaf", "smallleaf", "viking", "viking"],
+  14: ["bigleaf", "bigleaf", "viking", "smallleaf"],
+  15: ["king", "bigleaf", "smallleaf"],
+  
+  16: ["king", "smallleaf", "smallleaf", "bigleaf"],
+  17: ["king", "bigleaf", "bigleaf", "smallleaf"],
+  18: ["king", "bigleaf", "bigleaf", "bigleaf"],
+  19: ["king", "king", "bigleaf", "bigleaf"],
+  20: ["king", "king", "bigleaf", "bigleaf", "smallleaf"],
+
+  21: ["king", "king", "king", "bigleaf"],
+  22: ["king", "king", "bigleaf", "bigleaf", "smallleaf"],
+  23: ["king", "king", "bigleaf", "bigleaf", "bigleaf"],
+  24: ["king", "king", "king", "bigleaf", "smallleaf"],
+  25: ["king", "king", "king", "bigleaf", "bigleaf"],
+  
+  26: ["king", "king", "bigleaf", "bigleaf", "bigleaf", "smallleaf"],
+  27: ["king", "king", "king", "bigleaf", "bigleaf", "bigleaf"],
+  28: ["king", "king", "king", "bigleaf", "bigleaf", "bigleaf", "smallleaf"],
+  29: ["king", "king", "king", "bigleaf", "bigleaf", "bigleaf", "bigleaf"],
+  30: ["bigking"] // 👑 seul, boss final
 };
+
 
 
     private static instance: WaveManager | null = null;
@@ -123,15 +143,28 @@ public async startWave(): Promise<void> {
                     case "slime":
                         enemy = new Slime(this.scene, spawnPosition, "1", "1");
                         break;
-                    case "knight":
+                         case "bunny":
+                        enemy = new Bunny(this.scene, spawnPosition, "1", "1");
+                        break;
+                        case "knight":
                         enemy = new Knight(this.scene, spawnPosition, "1", "1");
                         break;
                         case "viking":
                         enemy = new Viking(this.scene, spawnPosition, "1", "1");
                         break;
-                        case "attacker":
-                        enemy = new Attacker(this.scene, spawnPosition, "1", "1");
+                        case "smallleaf":
+                        enemy = new SmallLeaf(this.scene, spawnPosition, "1", "1");
                         break;
+                        case "bigleaf":
+                        enemy = new Bigleaf(this.scene, spawnPosition, "1", "1");
+                        break;
+                        case "king":
+                        enemy = new King(this.scene, spawnPosition, "1", "1");
+                        break;
+                        case "bigking":
+                        enemy = new BigKing(this.scene, spawnPosition, "1", "1");
+                        break;
+
                     default:
                         console.warn(`Unknown enemy type: ${enemyTypes[i]}`);
                         return;
@@ -145,7 +178,7 @@ public async startWave(): Promise<void> {
                     this.waveStarted = true;
                  
                 }
-            }, i * 3000);
+            }, i * random(2000, 3000)); // Random delay between 500ms and 1000ms for each enemy spawn
         }
         console.log(`Wave ${this.currentWave} started with ${enemyTypes.length} enemies.`);
     }, 1500); // Laisse le temps à l'animation wave de s'afficher
@@ -191,3 +224,7 @@ public async startWave(): Promise<void> {
         UIManager.getInstance().showStartWaveButton();
     }
 }
+function random(min: number, max: number): number {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+

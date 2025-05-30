@@ -424,10 +424,19 @@ export class Slime extends Enemy {
     }
 }
 
+export class Bunny extends Enemy {
+    constructor(scene: BABYLON.Scene, position: BABYLON.Vector3, level: string, spawnLabel: string) {
+        super(scene, "slime_bunny", position, 20, level, spawnLabel);
+        this.speed = 10;
+    }
+    getReward(): number {
+        return 2; // Knight donne 5 pièces
+    }
+}
 export class Knight extends Enemy {
     constructor(scene: BABYLON.Scene, position: BABYLON.Vector3, level: string, spawnLabel: string) {
         super(scene, "Slime_01_MeltalHelmet", position, 20, level, spawnLabel);
-        this.speed = 10;
+        this.speed = 12;
     }
     getReward(): number {
         return 2; // Knight donne 5 pièces
@@ -436,7 +445,7 @@ export class Knight extends Enemy {
 
 export class Viking extends Enemy {
     constructor(scene: BABYLON.Scene, position: BABYLON.Vector3, level: string, spawnLabel: string) {
-        super(scene, "Slime_01_Viking", position, 20, level, spawnLabel);
+        super(scene, "Slime_01_Viking", position, 30, level, spawnLabel);
         this.speed = 12;
     }
     getReward(): number {
@@ -447,12 +456,53 @@ export class Viking extends Enemy {
     }
 }
 
-export class Attacker extends Enemy {
+export class SmallLeaf extends Enemy {
     constructor(scene: BABYLON.Scene, position: BABYLON.Vector3, level: string, spawnLabel: string) {
-        super(scene, "Slime_03 Leaf", position, 20, level, spawnLabel);
+        super(scene, "Slime_03 Leaf", position, 30, level, spawnLabel);
+        this.speed = 12;
+    }
+    getReward(): number {
+        return 2; // Viking donne 7 pièces
+    }
+    protected moveToNextWaypoint(): void {
+        super.moveToNextWaypoint();
+    }
+}
+export class Bigleaf extends Enemy {
+    constructor(scene: BABYLON.Scene, position: BABYLON.Vector3, level: string, spawnLabel: string) {
+        super(scene, "Slime_super_leaf", position, 40, level, spawnLabel);
         this.speed = 15;
     }
     getReward(): number {
         return 2; // Attacker donne 10 pièces
     }
+      protected moveToNextWaypoint(): void {
+        super.moveToNextWaypoint();
+    }
 }
+export class King extends Enemy {
+    constructor(scene: BABYLON.Scene, position: BABYLON.Vector3, level: string, spawnLabel: string) {
+        super(scene, "Slime_King", position, 40, level, spawnLabel);
+        this.speed = 18;
+    }
+    getReward(): number {
+        return 2; // Attacker donne 10 pièces
+    }
+      protected moveToNextWaypoint(): void {
+        super.moveToNextWaypoint();
+    }
+}
+export class BigKing extends Enemy {
+    constructor(scene: BABYLON.Scene, position: BABYLON.Vector3, level: string, spawnLabel: string) {
+        super(scene, "Slime_big_King", position, 1000, level, spawnLabel);
+        this.speed = 6;
+    }
+    getReward(): number {
+        return 2; // Attacker donne 10 pièces
+    }
+      protected moveToNextWaypoint(): void {
+        super.moveToNextWaypoint();
+    }
+}
+
+

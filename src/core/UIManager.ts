@@ -701,9 +701,15 @@ private addMouseTrailEffect(): void {
                 placeholder.style.boxShadow = "0 6px 24px #00bfff55, 0 2px 8px #0008";
                 placeholder.style.cursor = "pointer";
                 placeholder.style.pointerEvents = "auto";
-                // Retire le cadenas si présent
+                // Retire le cadenas si présent (plus robuste)
                 Array.from(placeholder.children).forEach(child => {
-                    if ((child as HTMLElement).innerHTML === "🔒") child.remove();
+                    if (
+                        child instanceof HTMLElement &&
+                        child.tagName === "DIV" &&
+                        child.innerHTML.trim() === "🔒"
+                    ) {
+                        child.remove();
+                    }
                 });
                 // Met à jour le nom et la couleur du texte
                 const nameDiv = placeholder.querySelector("div");

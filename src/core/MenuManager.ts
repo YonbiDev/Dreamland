@@ -390,6 +390,296 @@ export class MenuManager {
         };
         creditsContent.appendChild(closeCreditsBtn);
 
+        // === Enemy Info button ===
+        const enemyInfoBtn = document.createElement("button");
+        enemyInfoBtn.innerHTML = `<span style="margin-right:10px;vertical-align:middle;">🧟‍♂️</span>Infos Ennemis`;
+        enemyInfoBtn.style.padding = "16px 48px";
+        enemyInfoBtn.style.margin = "10px";
+        enemyInfoBtn.style.fontSize = "22px";
+        enemyInfoBtn.style.color = "#fff";
+        enemyInfoBtn.style.background = "linear-gradient(90deg, #005bea 0%, #3ec6e0 100%)";
+        enemyInfoBtn.style.border = "none";
+        enemyInfoBtn.style.borderRadius = "14px";
+        enemyInfoBtn.style.cursor = "pointer";
+        enemyInfoBtn.style.fontWeight = "bold";
+        enemyInfoBtn.style.boxShadow = "0 4px 18px rgba(30,30,100,0.25)";
+        enemyInfoBtn.style.transition = "transform 0.2s, box-shadow 0.2s, background 0.2s, filter 0.2s";
+        enemyInfoBtn.style.filter = "drop-shadow(0 0 10px #b2bec3)";
+        enemyInfoBtn.onmouseover = () => {
+            enemyInfoBtn.style.transform = "scale(1.11) rotate(-2deg)";
+            enemyInfoBtn.style.background = "linear-gradient(90deg, #3ec6e0 0%, #005bea 100%)";
+            enemyInfoBtn.style.boxShadow = "0 8px 32px #b2bec3";
+            enemyInfoBtn.style.filter = "drop-shadow(0 0 20px #b2bec3)";
+        };
+        enemyInfoBtn.onmouseout = () => {
+            enemyInfoBtn.style.transform = "scale(1)";
+            enemyInfoBtn.style.background = "linear-gradient(90deg, #005bea 0%, #3ec6e0 100%)";
+            enemyInfoBtn.style.boxShadow = "0 4px 18px rgba(30,30,100,0.25)";
+            enemyInfoBtn.style.filter = "drop-shadow(0 0 10px #b2bec3)";
+        };
+        enemyInfoBtn.style.opacity = "0";
+        enemyInfoBtn.style.transform = "translateY(30px) scale(0.95)";
+        setTimeout(() => {
+            enemyInfoBtn.style.opacity = "1";
+            enemyInfoBtn.style.transform = "translateY(0) scale(1)";
+        }, 800);
+        panel.appendChild(enemyInfoBtn);
+
+        // === Enemy Info Modal ===
+        const enemyInfoModal = document.createElement("div");
+        enemyInfoModal.style.position = "fixed";
+        enemyInfoModal.style.top = "0";
+        enemyInfoModal.style.left = "0";
+        enemyInfoModal.style.width = "100vw";
+        enemyInfoModal.style.height = "100vh";
+        enemyInfoModal.style.background = "rgba(0,0,0,0.92)";
+        enemyInfoModal.style.display = "flex";
+        enemyInfoModal.style.flexDirection = "column";
+        enemyInfoModal.style.justifyContent = "center";
+        enemyInfoModal.style.alignItems = "center";
+        enemyInfoModal.style.zIndex = "2100";
+        enemyInfoModal.style.visibility = "hidden";
+        enemyInfoModal.style.opacity = "0";
+        enemyInfoModal.style.transition = "opacity 0.4s cubic-bezier(.77,0,.18,1)";
+        document.body.appendChild(enemyInfoModal);
+
+        const enemyInfoContent = document.createElement("div");
+        enemyInfoContent.style.background = "linear-gradient(135deg, #232526 0%, #414345 100%)";
+        enemyInfoContent.style.padding = "48px 70px";
+        enemyInfoContent.style.borderRadius = "22px";
+        enemyInfoContent.style.boxShadow = "0 12px 48px rgba(0,0,0,0.65)";
+        enemyInfoContent.style.display = "flex";
+        enemyInfoContent.style.flexDirection = "column";
+        enemyInfoContent.style.alignItems = "center";
+        enemyInfoContent.style.gap = "32px";
+        enemyInfoContent.style.transform = "scale(0.92)";
+        enemyInfoContent.style.opacity = "0";
+        enemyInfoContent.style.transition = "opacity 0.4s cubic-bezier(.77,0,.18,1), transform 0.4s cubic-bezier(.77,0,.18,1)";
+        enemyInfoModal.appendChild(enemyInfoContent);
+
+        // Title with icon
+        const enemyInfoTitle = document.createElement("h2");
+        enemyInfoTitle.innerHTML = `<span style="font-size:36px;vertical-align:middle;margin-right:10px;">🧟‍♂️</span>Ennemis`;
+        enemyInfoTitle.style.color = "#fff";
+        enemyInfoTitle.style.fontSize = "36px";
+        enemyInfoTitle.style.marginBottom = "10px";
+        enemyInfoTitle.style.textAlign = "center";
+        enemyInfoTitle.style.letterSpacing = "2px";
+        enemyInfoContent.appendChild(enemyInfoTitle);
+
+        // Enemy data
+        const enemies = [
+            {
+                name: "Slime",
+                img: "assets/enemies/slime.png",
+                desc: "Un fantôme basique, lent mais nombreux.",
+                health: 10,
+                speed: 10,
+                icon: "🟢"
+            },
+            {
+                name: "Bunny",
+                img: "assets/enemies/bunny.png",
+                desc: "Fantôme lapin, rapide et agile, il bondit vers la sortie.",
+                health: 20,
+                speed: 10,
+                icon: "🐰"
+            },
+            {
+                name: "Knight",
+                img: "assets/enemies/knight.png",
+                desc: "Fantôme chevalier, protégé par une armure, il résiste mieux.",
+                health: 20,
+                speed: 12,
+                icon: "🛡️"
+            },
+            {
+                name: "Viking",
+                img: "assets/enemies/viking.png",
+                desc: "Fantôme viking, robuste et déterminé.",
+                health: 30,
+                speed: 12,
+                icon: "⚔️"
+            },
+            {
+                name: "Small Leaf",
+                img: "assets/enemies/smallleaf.png",
+                desc: "Petit fantôme feuillu, discret mais rapide.",
+                health: 30,
+                speed: 12,
+                icon: "🍃"
+            },
+            {
+                name: "Big Leaf",
+                img: "assets/enemies/bigleaf.png",
+                desc: "Grand fantôme feuillu, très résistant.",
+                health: 40,
+                speed: 15,
+                icon: "🌿"
+            },
+            {
+                name: "King",
+                img: "assets/enemies/king.png",
+                desc: "Le roi des fantômes, rapide et dangereux.",
+                health: 40,
+                speed: 18,
+                icon: "👑"
+            },
+            {
+                name: "Big King",
+                img: "assets/enemies/bigking.png",
+                desc: "Le boss final, un fantôme colossal et extrêmement résistant.",
+                health: 400,
+                speed: 6,
+                icon: "🦁"
+            }
+        ];
+
+        // Enemy list container
+        const enemyList = document.createElement("div");
+        enemyList.style.display = "flex";
+        enemyList.style.flexDirection = "column";
+        enemyList.style.justifyContent = "center";
+        enemyList.style.alignItems = "center";
+        enemyList.style.gap = "18px";
+        enemyList.style.marginTop = "10px";
+        enemyInfoContent.appendChild(enemyList);
+
+        // Split enemies in two rows of 4
+        const topRow = document.createElement("div");
+        topRow.style.display = "flex";
+        topRow.style.flexDirection = "row";
+        topRow.style.justifyContent = "center";
+        topRow.style.alignItems = "center";
+        topRow.style.gap = "18px";
+        enemyList.appendChild(topRow);
+
+        const bottomRow = document.createElement("div");
+        bottomRow.style.display = "flex";
+        bottomRow.style.flexDirection = "row";
+        bottomRow.style.justifyContent = "center";
+        bottomRow.style.alignItems = "center";
+        bottomRow.style.gap = "18px";
+        enemyList.appendChild(bottomRow);
+
+        enemies.forEach((enemy, idx) => {
+            const card = document.createElement("div");
+            card.style.display = "flex";
+            card.style.flexDirection = "column";
+            card.style.alignItems = "center";
+            card.style.background = "linear-gradient(135deg, #1e2838 0%, #2c3e50 100%)";
+            card.style.borderRadius = "12px";
+            card.style.padding = "12px 10px";
+            card.style.width = "120px";
+            card.style.boxShadow = "0 2px 10px rgba(0,0,0,0.25)";
+            card.style.transition = "transform 0.18s, box-shadow 0.18s";
+            card.onmouseover = () => {
+                card.style.transform = "scale(1.06)";
+                card.style.boxShadow = "0 4px 18px #3ec6e0";
+            };
+            card.onmouseout = () => {
+                card.style.transform = "scale(1)";
+                card.style.boxShadow = "0 2px 10px rgba(0,0,0,0.25)";
+            };
+
+            // Icon
+            const icon = document.createElement("div");
+            icon.innerText = enemy.icon;
+            icon.style.fontSize = "26px";
+            icon.style.marginBottom = "2px";
+            card.appendChild(icon);
+
+            // Image
+            const img = document.createElement("img");
+            img.src = enemy.img;
+            img.alt = enemy.name;
+            img.style.width = "60px";
+            img.style.height = "60px";
+            img.style.objectFit = "contain";
+            img.style.marginBottom = "6px";
+            img.style.borderRadius = "8px";
+            img.style.boxShadow = "0 1px 6px #005bea33";
+            card.appendChild(img);
+
+            // Name
+            const name = document.createElement("div");
+            name.innerText = enemy.name;
+            name.style.color = "#fff";
+            name.style.fontWeight = "bold";
+            name.style.fontSize = "15px";
+            name.style.marginBottom = "2px";
+            name.style.letterSpacing = "0.5px";
+            card.appendChild(name);
+
+            // Stats
+            const stats = document.createElement("div");
+            stats.style.display = "flex";
+            stats.style.justifyContent = "center";
+            stats.style.alignItems = "center";
+            stats.style.gap = "6px";
+            stats.style.marginBottom = "3px";
+            stats.innerHTML = `
+                <span title="Vie" style="color:#ff5252;font-size:13px;vertical-align:middle;">❤️</span>
+                <span style="color:#fff;font-size:12px;">${enemy.health}</span>
+                <span title="Vitesse" style="color:#00e6e6;font-size:13px;vertical-align:middle;margin-left:5px;">⚡</span>
+                <span style="color:#fff;font-size:12px;">${enemy.speed}</span>
+            `;
+            card.appendChild(stats);
+
+            // Description
+            const desc = document.createElement("div");
+            desc.innerText = enemy.desc;
+            desc.style.color = "#b2bec3";
+            desc.style.fontSize = "11px";
+            desc.style.textAlign = "center";
+            desc.style.marginBottom = "1px";
+            card.appendChild(desc);
+
+            if (idx < 4) {
+                topRow.appendChild(card);
+            } else {
+                bottomRow.appendChild(card);
+            }
+        });
+
+        // Close button
+        const closeEnemyInfoBtn = document.createElement("button");
+        closeEnemyInfoBtn.innerHTML = `<span style="font-size:18px;vertical-align:middle;margin-right:6px;">✖️</span>Fermer`;
+        closeEnemyInfoBtn.style.padding = "12px 36px";
+        closeEnemyInfoBtn.style.fontSize = "20px";
+        closeEnemyInfoBtn.style.background = "linear-gradient(90deg, #d32f2f 0%, #b71c1c 100%)";
+        closeEnemyInfoBtn.style.color = "#fff";
+        closeEnemyInfoBtn.style.border = "none";
+        closeEnemyInfoBtn.style.borderRadius = "10px";
+        closeEnemyInfoBtn.style.cursor = "pointer";
+        closeEnemyInfoBtn.style.marginTop = "22px";
+        closeEnemyInfoBtn.style.transition = "background 0.2s, transform 0.2s";
+        closeEnemyInfoBtn.onmouseover = () => {
+            closeEnemyInfoBtn.style.background = "linear-gradient(90deg, #b71c1c 0%, #d32f2f 100%)";
+            closeEnemyInfoBtn.style.transform = "scale(1.08)";
+        };
+        closeEnemyInfoBtn.onmouseout = () => {
+            closeEnemyInfoBtn.style.background = "linear-gradient(90deg, #d32f2f 0%, #b71c1c 100%)";
+            closeEnemyInfoBtn.style.transform = "scale(1)";
+        };
+        closeEnemyInfoBtn.onclick = () => {
+            enemyInfoModal.style.opacity = "0";
+            enemyInfoContent.style.opacity = "0";
+            enemyInfoContent.style.transform = "scale(0.92)";
+            setTimeout(() => { enemyInfoModal.style.visibility = "hidden"; }, 400);
+        };
+        enemyInfoContent.appendChild(closeEnemyInfoBtn);
+
+        // Open modal on button click
+        enemyInfoBtn.onclick = () => {
+            enemyInfoModal.style.visibility = "visible";
+            setTimeout(() => {
+                enemyInfoModal.style.opacity = "1";
+                enemyInfoContent.style.opacity = "1";
+                enemyInfoContent.style.transform = "scale(1)";
+            }, 10);
+        };
+
         // Add animated particles in menu background
         function createAnimatedParticle() {
             const p = document.createElement("div");
