@@ -3,22 +3,42 @@
 <img src="https://github.com/user-attachments/assets/bafab0cc-d4c1-4ddb-a631-642a9f276d8e" alt="image_jeu" >
 
 
+### 👤 Auteur
 
 🎮 **Par** : Fouad Benamara  
 🏫 **Université** : Université de Haute-Alsace, Mulhouse  
-🎓 **Niveau** : Master 1 (M1)
+🎓 **Niveau** : Master 1 (M1)  
+🔗 [LinkedIn](https://www.linkedin.com/in/fouad-benamara)  
+
+---
+
+## 🌐 Accès au Projet et au Jeu
+
+### 📁 Code Source sur GitHub  
+Plonge dans les coulisses du développement !  
+🔗 [Voir le dépôt Dreamland sur GitHub](https://github.com/YonbiDev/Dreamland/tree/gh-pages)
 
 ---
 
 ### 📄 Documentation Officielle  
 Retrouve toutes les infos techniques du jeu : mécanique, architecture, astuces de développement...  
-📘 [Lire la documentation](https://github.com/YonbiDev/Dreamland/blob/main/DOCUMENTATION.md)
+📘 [Lire la documentation](https://github.com/gamesonweb/dreamland-YonbiDev/blob/main/DOCUMENTATION.md)
+
+---
+
+### 📺 Vidéo de Gameplay  
+Découvre **Defenders of the Dreamland** en action !  
+🎮 Plonge dans l'univers magique du jeu, découvre les mécaniques, les tourelles et les stratégies.
+
+🔗 [Regarder le gameplay sur YouTube](https://www.youtube.com/watch?v=jNVX-ozdFNw)
 
 ---
 
 ### 🎮 Lancer le Jeu  
 Prêt à défendre l'Arbre Cristal ?  
 🚀 [Jouer à Dreamland](https://yonbidev.github.io/Dreamland/)
+
+---
 
 ![Histoire](https://github.com/user-attachments/assets/c8692669-d2a1-43c3-a150-1b179ef74387)
 
@@ -37,31 +57,33 @@ Cependant, Dreamland est corrompue par des entités sombres appelées **les Rêv
 ![Gameplay](https://github.com/user-attachments/assets/a9e5687e-0b88-4c0e-8ea4-6251f10d7a7c)
 
 
-Guardians of Dreamland est un **jeu de type Tower Defense**, où stratégie, anticipation et positionnement sont la clé.
-
-### 🔸 Phases de jeu
-
-#### 🧱 1. Phase de Préparation
-
-- 👇 En bas de l'écran, plusieurs **icônes de tourelles (arbres magiques)** sont disponibles.
-- 🌀 Chaque tourelle coûte des **Éclats de Rêves** (la monnaie du jeu).
-- 🖱️ **Clic gauche** : sélectionne et place une tourelle sur le terrain.
-- ❌ **Clic droit** : annule la pose de tourelle si vous changez d'avis.
-- ✅ Une fois vos tourelles placées, cliquez sur le bouton **"Commencer la vague"** (Start Wave) pour lancer la prochaine attaque.
-
-#### ⚔️ 2. Phase de Combat
-
-- 🌊 Des **vagues successives d'ennemis** apparaissent et se dirigent vers le **Nexus**.
-- 🌳 Vos tourelles attaquent automatiquement les ennemis à portée.
-- 🛠️ Entre chaque vague, vous pouvez placer d'autre tourelles si vous avez suffisamment d’éclats.
+**Guardians of Dreamland** est un jeu **Tower Defense** dans lequel vous devez défendre le Nexus contre des vagues d’ennemis en utilisant la puissance des arbres magiques. Le jeu mêle stratégie, anticipation et placement tactique.
 
 ---
 
-## 🎯 Objectif
+### 🔄 Déroulement du Jeu
 
-Empêchez les **Rêves** d’atteindre le **Nexus Cristallin**.
+#### 🧱 Phase de Préparation  
+- En début de chaque vague, vous disposez de plusieurs tourelles (arbres magiques), chacune ayant un coût en **Éclats de Rêves**.  
+- Placez stratégiquement vos tourelles sur le terrain pour couvrir un maximum de zones.  
+- Lorsque vous êtes prêt, cliquez sur **"Commencer la vague"** pour faire apparaître les ennemis.
 
-Chaque ennemi qui passe diminue la vie du Nexus. Si le Nexus tombe, Dreamland est perdue...
+#### ⚔️ Phase de Combat  
+- Les ennemis apparaissent en vagues successives et cherchent à atteindre le **Nexus**.  
+- Vos tourelles attaquent automatiquement les ennemis à portée, avec des effets et vitesses propres à chacune.  
+- À la fin de chaque vague, vous récupérez des Éclats de Rêves selon vos performances, que vous pouvez réinvestir pour renforcer votre défense.
+
+---
+
+### 🌟 Objectif
+
+Empêchez les ennemis d’atteindre le Nexus. Chaque ennemi qui passe vous fait perdre de l’énergie vitale. La partie prend fin lorsque le Nexus est détruit.
+
+---
+
+### 💡 Astuce
+
+Utilisez le terrain à votre avantage : les **angles, carrefours et intersections** sont idéaux pour maximiser les dégâts des tourelles.
 
 ---
 
@@ -70,6 +92,7 @@ Chaque ennemi qui passe diminue la vie du Nexus. Si le Nexus tombe, Dreamland es
 
 Protégez Dreamland, défendez le cristal, et devenez le Champion légendaire de ce monde onirique. 🌠  
   
+---
 
 ## 📜 Crédits
 
@@ -113,6 +136,16 @@ Protégez Dreamland, défendez le cristal, et devenez le Champion légendaire de
 ### 🧠 Contenus générés par IA
 
 - Certaines images du jeu ont été **générées avec l'IA** pour enrichir l'univers visuel du jeu.
+
+---
+
+## 🙏 Remerciements
+
+Un immense merci à toute l’équipe de **Babylon**.
+Également un grand merci aux **organisateurs de l'événement GameSonWeb** pour avoir rendu cette expérience possible.  
+Votre passion pour le jeu vidéo et votre engagement envers les développeurs indépendants sont une véritable source d'inspiration.
+
+🎮 Merci à tous ceux qui ont testé, encouragé et partagé **Guardians of Dreamland** !
 
 ---
 
