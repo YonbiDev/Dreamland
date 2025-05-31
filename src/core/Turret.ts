@@ -11,6 +11,7 @@ export abstract class Turret {
     fireRate: number;
     lastShotTime: number = 0;
     projectileSpeed: number;
+    private targetingObserver: BABYLON.Observer<BABYLON.Scene>;
 
     constructor(scene: BABYLON.Scene, position: BABYLON.Vector3, range: number , projectileSpeed: number = 30, fireRate: number = 1000) {
         this.scene = scene;
@@ -20,35 +21,52 @@ export abstract class Turret {
 
         this.loadModel(position);
 
-        setInterval(() => {
+        // Use onBeforeRenderObservable for reliable targeting
+        this.targetingObserver = this.scene.onBeforeRenderObservable.add(() => {
+            if (this.mesh && this.mesh.isDisposed && this.mesh.isDisposed()) return;
             this.findTarget();
-        }, 500);
+        });
     }
 
     // Méthode abstraite à implémenter dans les sous-classes pour charger le modèle
     abstract loadModel(position: BABYLON.Vector3): void;
 
     findTarget() {
+        if (!this.mesh) return;
         this.target = null;
         let closestDist = this.range;
 
-        enemies.forEach(enemy => {
-            if (enemy.mesh) {
+        for (const enemy of enemies) {
+            if (
+                enemy.mesh &&
+                (!enemy.mesh.isDisposed || !enemy.mesh.isDisposed()) &&
+                enemy.health > 0
+            ) {
                 const distance = BABYLON.Vector3.Distance(this.mesh.position, enemy.mesh.position);
                 if (distance < closestDist) {
                     closestDist = distance;
                     this.target = enemy.mesh;
                 }
             }
-        });
+        }
 
         if (this.target) {
-            console.log(`Turret targeting enemy at ${this.target.position}`);
+            // Optionally: this.mesh.lookAt(this.target.position);
             this.shoot();
         }
     }
 
-abstract shoot(): void;
+    abstract shoot(): void;
+
+    // Clean up observer if needed (call this when turret is destroyed)
+    dispose() {
+        if (this.targetingObserver) {
+            this.scene.onBeforeRenderObservable.remove(this.targetingObserver);
+        }
+        if (this.mesh && !this.mesh.isDisposed()) {
+            this.mesh.dispose();
+        }
+    }
 }
 
 // Tourelle de type garden_tree_2

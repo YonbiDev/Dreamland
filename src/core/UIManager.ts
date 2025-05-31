@@ -67,7 +67,8 @@ export class UIManager {
         uiContainer.style.position = "absolute";
         uiContainer.style.bottom = "12%";
         uiContainer.style.left = "50%";
-        uiContainer.style.transform = "translateX(-50%)";
+        uiContainer.style.transform = "translateX(-50%) scale(0.75)"; // scale -25%
+        uiContainer.style.transformOrigin = "bottom center"; // pour bien réduire depuis le bas
         uiContainer.style.display = "flex";
         uiContainer.style.gap = "24px"; // More space between turrets
         uiContainer.style.padding = "16px 24px";
@@ -170,8 +171,10 @@ export class UIManager {
         // Add coin display container
         const coinContainer = document.createElement("div");
         coinContainer.style.position = "absolute";
-        coinContainer.style.top = "12%"; // Ensure it is below the black bar
+        coinContainer.style.top = "12%";
         coinContainer.style.left = "10px";
+        coinContainer.style.transform = "scale(0.75)"; // scale -25%
+        coinContainer.style.transformOrigin = "top left";
         coinContainer.style.display = "flex";
         coinContainer.style.alignItems = "center";
         coinContainer.style.padding = "10px";
@@ -202,8 +205,10 @@ export class UIManager {
         // Add health display container
         const healthContainer = document.createElement("div");
         healthContainer.style.position = "absolute";
-        healthContainer.style.top = "calc(12% + 50px)"; // Ensure it is below the coin display
+        healthContainer.style.top = "calc(12% + 50px * 0.75)"; // ajusté pour scale
         healthContainer.style.left = "10px";
+        healthContainer.style.transform = "scale(0.75)";
+        healthContainer.style.transformOrigin = "top left";
         healthContainer.style.display = "flex";
         healthContainer.style.alignItems = "center";
         healthContainer.style.padding = "10px";
@@ -233,8 +238,10 @@ export class UIManager {
         // Ajout : affichage du nombre d'ennemis dans la vague courante
         const enemyCountContainer = document.createElement("div");
         enemyCountContainer.style.position = "absolute";
-        enemyCountContainer.style.top = "calc(12% + 100px)"; // sous la vie
+        enemyCountContainer.style.top = "calc(12% + 100px * 0.75)"; // ajusté pour scale
         enemyCountContainer.style.left = "10px";
+        enemyCountContainer.style.transform = "scale(0.75)";
+        enemyCountContainer.style.transformOrigin = "top left";
         enemyCountContainer.style.display = "flex";
         enemyCountContainer.style.alignItems = "center";
         enemyCountContainer.style.padding = "10px";
@@ -1028,6 +1035,8 @@ private addMouseTrailEffect(): void {
         this.startWaveButton.style.borderRadius = "5px";
         this.startWaveButton.style.cursor = "pointer";
         this.startWaveButton.style.zIndex = "1001"; // Above the cinematic bars
+        this.startWaveButton.style.transform = "scale(0.75)";
+        this.startWaveButton.style.transformOrigin = "top left";
         document.body.appendChild(this.startWaveButton);
 
         this.startWaveButton.onclick = () => {
@@ -1465,7 +1474,7 @@ export class UITutorial {
         msg.style.background = "#fff";
         msg.style.color = "#232526";
         msg.style.padding = "32px 48px";
-        msg.style.fontSize = "2rem";
+        msg.style.fontSize = "1.2rem"; // Réduit la taille du texte ici (au lieu de 2rem)
         msg.style.fontWeight = "bold";
         msg.style.borderRadius = "18px";
         msg.style.boxShadow = "0 8px 32px #00bfff88";

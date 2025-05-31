@@ -14,42 +14,40 @@ export class WaveManager {
     private currentWaveEnemies: Enemy[] = []; // Track enemies of the current wave.
     private waveStarted: boolean = false;
     private spawnPositions: BABYLON.Vector3[] = []; // Store spawn positions for the current wav
-public waveConfigurations: { [waveNumber: number]: string[] } = {
-  1: ["slime"], // Wave 1 configuration
+ public waveConfigurations: { [waveNumber: number]: string[] } = {
+  1: ["slime"],
   2: ["slime", "bunny"],
-  3: ["slime", "bunny", "bunny"],
-  4: ["slime","bunny","bunny", "bunny"],
-  5: ["knight", "bunny"],
-  6: ["knight", "knight", "bunny"],
-  7: ["knight", "bunny", "viking"],
-  8: ["viking", "knight", "bunny"],
-  9: ["viking", "viking", "knight", "bunny"],
-  10: ["viking", "viking", "bunny", "smallleaf"],
-  
-  11: ["viking", "viking", "smallleaf", "smallleaf"],
-  12: ["smallleaf", "smallleaf", "viking", "bigleaf"],
-  13: ["bigleaf", "smallleaf", "viking", "viking"],
-  14: ["bigleaf", "bigleaf", "viking", "smallleaf"],
-  15: ["king", "bigleaf", "smallleaf"],
-  
-  16: ["king", "smallleaf", "smallleaf", "bigleaf"],
-  17: ["king", "bigleaf", "bigleaf", "smallleaf"],
-  18: ["king", "bigleaf", "bigleaf", "bigleaf"],
-  19: ["king", "king", "bigleaf", "bigleaf"],
-  20: ["king", "king", "bigleaf", "bigleaf", "smallleaf"],
-
-  21: ["king", "king", "king", "bigleaf"],
-  22: ["king", "king", "bigleaf", "bigleaf", "smallleaf"],
-  23: ["king", "king", "bigleaf", "bigleaf", "bigleaf"],
-  24: ["king", "king", "king", "bigleaf", "smallleaf"],
-  25: ["king", "king", "king", "bigleaf", "bigleaf"],
-  
-  26: ["king", "king", "bigleaf", "bigleaf", "bigleaf", "smallleaf"],
-  27: ["king", "king", "king", "bigleaf", "bigleaf", "bigleaf"],
-  28: ["king", "king", "king", "bigleaf", "bigleaf", "bigleaf", "smallleaf"],
-  29: ["king", "king", "king", "bigleaf", "bigleaf", "bigleaf", "bigleaf"],
-  30: ["bigking"] // 👑 seul, boss final
+  3: ["slime", "bunny", "knight"],
+  4: ["bunny", "knight", "viking"],
+  5: ["knight", "knight", "viking", "smallleaf"],
+  6: ["viking", "viking", "smallleaf", "smallleaf"],
+  7: ["smallleaf", "smallleaf", "bigleaf", "viking", "knight"],
+  8: ["smallleaf", "bigleaf", "bigleaf", "king"],
+  9: ["bigleaf", "bigleaf", "king", "king", "smallleaf"],
+  10: ["king", "king", "bigleaf", "bigleaf", "smallleaf", "smallleaf"],
+  11: ["bigleaf", "bigleaf", "king", "king", "king", "smallleaf"],
+  12: ["king", "king", "king", "king", "bigleaf", "bigleaf"],
+  13: ["bigleaf", "bigleaf", "bigleaf", "king", "king", "king"],
+  14: ["bigleaf", "king", "king", "king", "king", "king"],
+  15: ["king", "king", "king", "king", "king", "king", "bigleaf"],
+  16: ["king", "king", "king", "king", "bigleaf", "bigleaf", "bigleaf"],
+  17: ["bigleaf", "bigleaf", "bigleaf", "king", "king", "king", "king"],
+  18: ["bigleaf", "bigleaf", "bigleaf", "king", "king", "king", "king", "king"],
+  19: ["smallleaf", "bigleaf", "king", "king", "king", "king", "king"],
+  20: ["king", "king", "king", "king", "king", "bigleaf", "bigleaf", "bigleaf"],
+  21: ["bigleaf", "bigleaf", "bigleaf", "king", "king", "king", "king", "king", "king"],
+  22: ["bigleaf", "king", "king", "king", "king", "king", "king", "king"],
+  23: ["king", "king", "king", "king", "king", "king", "king", "king"],
+  24: ["bigleaf", "bigleaf", "king", "king", "king", "king", "king", "king", "king"],
+  25: ["king", "king", "king", "king", "bigleaf", "bigleaf", "king", "king"],
+  26: ["bigleaf", "bigleaf", "king", "king", "king", "king", "king", "king", "king"],
+  27: ["king", "king", "king", "king", "king", "king", "bigleaf", "bigleaf", "bigleaf"],
+  28: ["king", "king", "king", "king", "bigleaf", "bigleaf", "bigleaf", "smallleaf"],
+  29: ["king", "king", "king", "king", "king", "king", "king", "bigking"],
+  30: ["bigking", "king", "king", "bigleaf", "bigleaf", "bigleaf", "smallleaf", "smallleaf"]
 };
+
+
 
 
 
