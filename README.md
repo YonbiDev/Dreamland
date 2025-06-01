@@ -1,6 +1,6 @@
 # 🌌 Guardians of Dreamland
 
-<img src="https://github.com/user-attachments/assets/bafab0cc-d4c1-4ddb-a631-642a9f276d8e" alt="image_jeu" >
+<img src="https://github.com/user-attachments/assets/71e9d9d4-3ace-4b98-90cd-999022b67fe8" alt="image_jeu"  width="90%" >
 
 
 ### 👤 Auteur
@@ -27,7 +27,7 @@ Retrouve toutes les infos techniques du jeu : mécanique, architecture, astuces 
 ---
 
 ### 📺 Vidéo de Gameplay  
-Découvre **Defenders of the Dreamland** en action !  
+Découvre **Guardians of Dreamland** en action !  
 🎮 Plonge dans l'univers magique du jeu, découvre les mécaniques, les tourelles et les stratégies.
 
 🔗 [Regarder le gameplay sur YouTube](https://www.youtube.com/watch?v=jNVX-ozdFNw)
@@ -77,7 +77,7 @@ Cependant, Dreamland est corrompue par des entités sombres appelées **les Rêv
 
 ### 🌟 Objectif
 
-Empêchez les ennemis d’atteindre le Nexus. Chaque ennemi qui passe vous fait perdre de l’énergie vitale. La partie prend fin lorsque le Nexus est détruit.
+Empêchez les ennemis d’atteindre le Nexus. Chaque ennemi qui passe vous fait perdre de l’énergie vitale. La partie prend fin soit lorsque le Nexus est détruit, soit lorsque vous parvenez à survivre jusqu'à la vague 30.
 
 ---
 
@@ -117,19 +117,25 @@ Protégez Dreamland, défendez le cristal, et devenez le Champion légendaire de
 
 ---
 
+---
+
 ### 🧱 Assets Visuels (Unity Asset Store)
 
 - **Rockets, Missiles & Bombs – Cartoon Low Poly Pack**  
   Auteur : *BenjaTheMaker*  
-  [Unity Asset Store](https://assetstore.unity.com/)
 
 - **Fantasy FREE - Low Poly 3D Models Pack**  
   Auteur : *ithappy*  
-  [Unity Asset Store](https://assetstore.unity.com/)
 
 - **Palmov Island – Low Poly Atmospheric Locations Pack**  
   Auteur : *Palmov*  
-  [Unity Asset Store](https://assetstore.unity.com/)
+
+- **RPG Tiny Fantasy Forest – PBR**  
+  Auteur : *Trisula Studio*  
+
+- **Kawaii Slimes – 3D Creatures Pack**  
+  Auteur : *Félicien Perdu (CuteKittiesStudio)*  
+
 
 ---
 
@@ -148,4 +154,5 @@ Votre passion pour le jeu vidéo et votre engagement envers les développeurs in
 🎮 Merci à tous ceux qui ont testé, encouragé et partagé **Guardians of Dreamland** !
 
 ---
+
 
