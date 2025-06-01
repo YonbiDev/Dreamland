@@ -36,9 +36,6 @@ Découvre **Guardians of Dreamland** en action !
 
 ---
 
-
----
-
 ### 🎮 Lancer le Jeu  
 Prêt à défendre l'Arbre Cristal ?  
 🚀 [Jouer à Dreamland](https://yonbidev.github.io/Dreamland/)
