@@ -69,7 +69,7 @@ export abstract class Turret {
     }
 }
 
-// Tourelle de type garden_tree_2
+// Tourelle de type garden_Etoile
 export class GardenTreeTurret extends Turret {
     shoot(): void {
           const now = Date.now();

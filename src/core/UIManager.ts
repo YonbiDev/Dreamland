@@ -49,6 +49,27 @@ export class UIManager {
 
     private tutorialButton: HTMLButtonElement | null = null; // Add this line
 
+    // Ajout : prix dynamiques des tourelles
+    private turretPrices: { [key: string]: number } = {
+        garden_turret: 5,
+        snow_turret: 10,
+        mushroom_tree: 15,
+    };
+
+    // Ajout : compteur d'achats par tourelle
+    private turretPurchaseCount: { [key: string]: number } = {
+        garden_turret: 0,
+        snow_turret: 0,
+        mushroom_tree: 0,
+    };
+
+    // Ajout : incrément dynamique d'augmentation de prix par tourelle
+    private turretPriceIncrement: { [key: string]: number } = {
+        garden_turret: 2,
+        snow_turret: 2,
+        mushroom_tree: 2,
+    };
+
     constructor(scene: BABYLON.Scene, canvas: HTMLCanvasElement, game: Game) {
         this.scene = scene;
         this.canvas = canvas;
@@ -587,11 +608,8 @@ private addMouseTrailEffect(): void {
         };
         placeholderContainer.onclick = () => {
             if (this.turretUnlockState[objectType]) {
-                // Vérifie le coût avant de masquer la barre
-                let turretCost = 0;
-                if (objectType === "garden_turret") turretCost = 5;
-                else if (objectType === "snow_turret") turretCost = 10;
-                else if (objectType === "mushroom_tree") turretCost = 15;
+                // Correction : utiliser le prix dynamique
+                const turretCost = this.turretPrices[objectType] ?? 0;
                 if (
                     (objectType === "garden_turret" || objectType === "snow_turret" || objectType === "mushroom_tree") &&
                     this.game.getCoins() < turretCost
@@ -652,14 +670,9 @@ private addMouseTrailEffect(): void {
 
         // Price badge (toujours affiché, même si locked)
         const priceBadge = document.createElement("div");
+        // --- MODIF: prix dynamique ---
         priceBadge.innerHTML =
-            objectType === "garden_turret"
-                ? `<span style="color:#FFD700;font-weight:bold;">5</span> <img src="${ASSET_BASE_URL}UI_Diamond.PNG" style="width:16px;vertical-align:middle;">`
-                : objectType === "snow_turret"
-                ? `<span style="color:#FFD700;font-weight:bold;">10</span> <img src="${ASSET_BASE_URL}UI_Diamond.PNG" style="width:16px;vertical-align:middle;">`
-                : objectType === "mushroom_tree"
-                ? `<span style="color:#FFD700;font-weight:bold;">15</span> <img src="${ASSET_BASE_URL}UI_Diamond.PNG" style="width:16px;vertical-align:middle;">`
-                : "";
+            `<span style="color:#FFD700;font-weight:bold;" class="turret-price" data-type="${objectType}">${this.turretPrices[objectType]}</span> <img src="${ASSET_BASE_URL}UI_Diamond.PNG" style="width:16px;vertical-align:middle;">`;
         priceBadge.style.background = locked ? "#bbb" : "#232526";
         priceBadge.style.color = "#FFD700";
         priceBadge.style.fontWeight = "bold";
@@ -693,6 +706,14 @@ private addMouseTrailEffect(): void {
         placeholderContainer.appendChild(tooltip);
 
         this.turretPlaceholders[objectType] = placeholderContainer;
+    }
+
+    // --- Ajout : méthode pour mettre à jour le prix affiché d'une tourelle ---
+    private updateTurretPriceDisplay(objectType: string) {
+        const placeholder = this.turretPlaceholders[objectType];
+        if (!placeholder) return;
+        const priceSpan = placeholder.querySelector('.turret-price[data-type="' + objectType + '"]');
+        if (priceSpan) priceSpan.textContent = this.turretPrices[objectType].toString();
     }
 
     // Méthode pour débloquer une tourelle et prévenir le joueur
@@ -795,19 +816,16 @@ private addMouseTrailEffect(): void {
         const objectConfig = this.objectManager.getObjectConfig(objectType);
         if (!objectConfig) return;
 
-        // Définir le coût selon le type de tourelle
-        let turretCost = 0;
+        // --- MODIF: utiliser le prix dynamique ---
+        let turretCost = this.turretPrices[objectType] ?? 0;
         let modelName = "";
         let previewScale = new BABYLON.Vector3(2, 2, 2);
 
         if (objectType === "garden_turret") {
-            turretCost = 5;
             modelName = "garden_tree_2";
         } else if (objectType === "snow_turret") {
-            turretCost = 10;
             modelName = "snow_tree";
         } else if (objectType === "mushroom_tree") {
-            turretCost = 15;
             modelName = "mushroom_tree";
             previewScale = new BABYLON.Vector3(2, 2, 2);
         }
@@ -918,16 +936,27 @@ private addMouseTrailEffect(): void {
 
             if (isGround && isPositionFree && this.previewMesh) {
                 const objectType = this.previewMesh.name.replace("preview_", "");
-                let turretCost = 0;
-                if (objectType === "garden_turret") {
-                    turretCost = 5;
-                } else if (objectType === "snow_turret") {
-                    turretCost = 10;
-                } else if (objectType === "mushroom_tree") {
-                    turretCost = 15;
-                }
+                let turretCost = this.turretPrices[objectType] ?? 0;
                 if (objectType === "garden_turret" || objectType === "snow_turret" || objectType === "mushroom_tree") {
                     this.game.decreaseCoins(turretCost);
+
+                    // --- AJOUT: gestion augmentation progressive du prix ---
+                    this.turretPurchaseCount[objectType] = (this.turretPurchaseCount[objectType] ?? 0) + 1;
+
+                    let shouldIncrease = false;
+                    if (objectType === "garden_turret") {
+                        // Pour Sylve, à partir du 2ème achat
+                        if (this.turretPurchaseCount[objectType] >= 2) shouldIncrease = true;
+                    } else {
+                        // Pour les autres, dès le 1er achat
+                        shouldIncrease = true;
+                    }
+
+                    if (shouldIncrease) {
+                        this.turretPrices[objectType] += this.turretPriceIncrement[objectType];
+                        this.updateTurretPriceDisplay(objectType);
+                        this.turretPriceIncrement[objectType] += 1; // Incrément progressif
+                    }
                 }
 
                 snappedPosition.y += 0;
