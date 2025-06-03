@@ -451,7 +451,7 @@ private addMouseTrailEffect(): void {
     }
 
     private showGameOverMenu(): void {
-        // Masquer tous les autres éléments de l'UI et bloquer l'interaction
+        // Hide all other UI elements and block interaction
         document.body.querySelectorAll("div,button").forEach(el => {
             if (!(el as HTMLElement).classList.contains("gameover-victory-exclusive")) {
                 (el as HTMLElement).style.display = "none";
@@ -470,40 +470,85 @@ private addMouseTrailEffect(): void {
         gameOverContainer.style.flexDirection = "column";
         gameOverContainer.style.justifyContent = "center";
         gameOverContainer.style.alignItems = "center";
-        gameOverContainer.style.backgroundColor = "rgba(0, 0, 0, 0.95)";
+        gameOverContainer.style.background = "radial-gradient(ellipse at center, #1a1a2e 0%, #232526 100%)";
         gameOverContainer.style.zIndex = "99999";
         gameOverContainer.style.pointerEvents = "auto";
+        gameOverContainer.style.backdropFilter = "blur(2.5px)";
         document.body.appendChild(gameOverContainer);
 
-        // Add "Game Over" text
+        // Add "Game Over" text with style
         const gameOverText = document.createElement("div");
-        gameOverText.innerText = "Game Over";
-        gameOverText.style.color = "red";
-        gameOverText.style.fontSize = "64px";
-        gameOverText.style.marginBottom = "40px";
+        gameOverText.innerText = "L'Arbre Cristal s'est éteint...";
+        gameOverText.style.color = "#ff3b3b";
+        gameOverText.style.fontSize = "72px";
         gameOverText.style.fontWeight = "bold";
+        gameOverText.style.letterSpacing = "2px";
+        gameOverText.style.textShadow = "0 0 32px #ff3b3b, 0 0 64px #000";
+        gameOverText.style.marginBottom = "32px";
+        gameOverText.style.fontFamily = "'Segoe UI', Arial, sans-serif";
         gameOverContainer.appendChild(gameOverText);
+
+        // Add lore-inspired phrase
+        const lorePhrase = document.createElement("div");
+        lorePhrase.innerText = "Les ténèbres ont englouti le dernier espoir du royaume. Mais chaque fin porte en elle la promesse d’un nouveau départ...";
+        lorePhrase.style.color = "#fff";
+        lorePhrase.style.fontSize = "2rem";
+        lorePhrase.style.textAlign = "center";
+        lorePhrase.style.maxWidth = "700px";
+        lorePhrase.style.marginBottom = "48px";
+        lorePhrase.style.textShadow = "0 0 16px #000";
+        gameOverContainer.appendChild(lorePhrase);
+
+        // Add animated crystal image (optional, if asset exists)
+        const crystalImg = document.createElement("img");
+        crystalImg.src = ASSET_BASE_URL + "UI_Heart.png";
+        crystalImg.alt = "Cristal brisé";
+        crystalImg.style.width = "110px";
+        crystalImg.style.marginBottom = "32px";
+        crystalImg.style.filter = "drop-shadow(0 0 32px #ff3b3b88)";
+        crystalImg.style.animation = "crystalPulse 2s infinite alternate";
+        gameOverContainer.appendChild(crystalImg);
 
         // Add button to return to main menu
         const mainMenuButton = document.createElement("button");
-        mainMenuButton.innerText = "Retour au menu principal";
-        mainMenuButton.style.padding = "16px 32px";
-        mainMenuButton.style.fontSize = "28px";
-        mainMenuButton.style.color = "white";
-        mainMenuButton.style.backgroundColor = "blue";
+        mainMenuButton.innerText = "Recommencer l'aventure";
+        mainMenuButton.style.padding = "18px 48px";
+        mainMenuButton.style.fontSize = "2rem";
+        mainMenuButton.style.color = "#fff";
+        mainMenuButton.style.background = "linear-gradient(90deg,#ff3b3b,#232526 80%)";
         mainMenuButton.style.border = "none";
-        mainMenuButton.style.borderRadius = "8px";
+        mainMenuButton.style.borderRadius = "14px";
         mainMenuButton.style.cursor = "pointer";
-        mainMenuButton.style.marginTop = "20px";
+        mainMenuButton.style.marginTop = "16px";
+        mainMenuButton.style.fontWeight = "bold";
+        mainMenuButton.style.boxShadow = "0 4px 32px #ff3b3b55";
+        mainMenuButton.onmouseenter = () => {
+            mainMenuButton.style.background = "linear-gradient(90deg,#ff7b7b,#232526 80%)";
+            mainMenuButton.style.transform = "scale(1.04)";
+        };
+        mainMenuButton.onmouseleave = () => {
+            mainMenuButton.style.background = "linear-gradient(90deg,#ff3b3b,#232526 80%)";
+            mainMenuButton.style.transform = "scale(1)";
+        };
         gameOverContainer.appendChild(mainMenuButton);
 
         mainMenuButton.onclick = () => {
             window.location.reload();
         };
+
+        // Add CSS animation for crystal pulse
+        const style = document.createElement("style");
+        style.innerHTML = `
+        @keyframes crystalPulse {
+            0% { filter: drop-shadow(0 0 32px #ff3b3b88) brightness(1); }
+            100% { filter: drop-shadow(0 0 64px #ff3b3b) brightness(1.2); }
+        }
+        `;
+        document.head.appendChild(style);
     }
 
     public showVictoryMenu(): void {
-        // Masquer tous les autres éléments de l'UI et bloquer l'interaction
+        // Hide all other UI elements and block interaction
         document.body.querySelectorAll("div,button").forEach(el => {
             if (!(el as HTMLElement).classList.contains("gameover-victory-exclusive")) {
                 (el as HTMLElement).style.display = "none";
@@ -522,36 +567,81 @@ private addMouseTrailEffect(): void {
         victoryContainer.style.flexDirection = "column";
         victoryContainer.style.justifyContent = "center";
         victoryContainer.style.alignItems = "center";
-        victoryContainer.style.backgroundColor = "rgba(0, 0, 0, 0.95)";
+        victoryContainer.style.background = "radial-gradient(ellipse at center, #00ffd0 0%, #232526 100%)";
         victoryContainer.style.zIndex = "99999";
         victoryContainer.style.pointerEvents = "auto";
+        victoryContainer.style.backdropFilter = "blur(2.5px)";
         document.body.appendChild(victoryContainer);
 
-        // Add "Victory" text
+        // Add "Victory" text with style
         const victoryText = document.createElement("div");
-        victoryText.innerText = "Victoire!";
-        victoryText.style.color = "gold";
-        victoryText.style.fontSize = "64px";
-        victoryText.style.marginBottom = "40px";
+        victoryText.innerText = "L'Arbre Cristal rayonne à nouveau !";
+        victoryText.style.color = "#FFD700";
+        victoryText.style.fontSize = "72px";
         victoryText.style.fontWeight = "bold";
+        victoryText.style.letterSpacing = "2px";
+        victoryText.style.textShadow = "0 0 32px #FFD700, 0 0 64px #00ffd0";
+        victoryText.style.marginBottom = "32px";
+        victoryText.style.fontFamily = "'Segoe UI', Arial, sans-serif";
         victoryContainer.appendChild(victoryText);
+
+        // Add lore-inspired phrase
+        const lorePhrase = document.createElement("div");
+        lorePhrase.innerText = "Grâce à votre bravoure, la lumière des rêves a triomphé des ténèbres. Le royaume est sauvé, et l’espoir fleurit à nouveau sous les branches du Cristal.";
+        lorePhrase.style.color = "#fff";
+        lorePhrase.style.fontSize = "2rem";
+        lorePhrase.style.textAlign = "center";
+        lorePhrase.style.maxWidth = "700px";
+        lorePhrase.style.marginBottom = "48px";
+        lorePhrase.style.textShadow = "0 0 16px #00ffd0";
+        victoryContainer.appendChild(lorePhrase);
+
+        // Add animated crystal image (optional, if asset exists)
+        const crystalImg = document.createElement("img");
+        crystalImg.src = ASSET_BASE_URL + "UI_Diamond.PNG";
+        crystalImg.alt = "Cristal victorieux";
+        crystalImg.style.width = "110px";
+        crystalImg.style.marginBottom = "32px";
+        crystalImg.style.filter = "drop-shadow(0 0 32px #FFD70088)";
+        crystalImg.style.animation = "crystalVictoryPulse 2s infinite alternate";
+        victoryContainer.appendChild(crystalImg);
 
         // Add button to return to main menu
         const mainMenuButton = document.createElement("button");
-        mainMenuButton.innerText = "Retour au menu principal";
-        mainMenuButton.style.padding = "16px 32px";
-        mainMenuButton.style.fontSize = "28px";
-        mainMenuButton.style.color = "white";
-        mainMenuButton.style.backgroundColor = "blue";
+        mainMenuButton.innerText = "Rejouer";
+        mainMenuButton.style.padding = "18px 48px";
+        mainMenuButton.style.fontSize = "2rem";
+        mainMenuButton.style.color = "#232526";
+        mainMenuButton.style.background = "linear-gradient(90deg,#FFD700,#00FFD0 80%)";
         mainMenuButton.style.border = "none";
-        mainMenuButton.style.borderRadius = "8px";
+        mainMenuButton.style.borderRadius = "14px";
         mainMenuButton.style.cursor = "pointer";
-        mainMenuButton.style.marginTop = "20px";
+        mainMenuButton.style.marginTop = "16px";
+        mainMenuButton.style.fontWeight = "bold";
+        mainMenuButton.style.boxShadow = "0 4px 32px #FFD70055";
+        mainMenuButton.onmouseenter = () => {
+            mainMenuButton.style.background = "linear-gradient(90deg,#fff700,#00FFD0 80%)";
+            mainMenuButton.style.transform = "scale(1.04)";
+        };
+        mainMenuButton.onmouseleave = () => {
+            mainMenuButton.style.background = "linear-gradient(90deg,#FFD700,#00FFD0 80%)";
+            mainMenuButton.style.transform = "scale(1)";
+        };
         victoryContainer.appendChild(mainMenuButton);
 
         mainMenuButton.onclick = () => {
             window.location.reload();
         };
+
+        // Add CSS animation for crystal pulse
+        const style = document.createElement("style");
+        style.innerHTML = `
+        @keyframes crystalVictoryPulse {
+            0% { filter: drop-shadow(0 0 32px #FFD70088) brightness(1); }
+            100% { filter: drop-shadow(0 0 64px #FFD700) brightness(1.2); }
+        }
+        `;
+        document.head.appendChild(style);
     }
 
     // --- UI Turret Bar Show/Hide ---

@@ -494,7 +494,7 @@ export class King extends Enemy {
 }
 export class BigKing extends Enemy {
     constructor(scene: BABYLON.Scene, position: BABYLON.Vector3, level: string, spawnLabel: string) {
-        super(scene, "Slime_big_King", position, 1000, level, spawnLabel);
+        super(scene, "Slime_big_King", position, 400, level, spawnLabel);
         this.speed = 6;
     }
     getReward(): number {

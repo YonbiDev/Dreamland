@@ -9,7 +9,7 @@ export class WaveManager {
     private waypointManager: typeof WaypointManager;
     private enemiesToSpawn: number;
     private spawnKey: string;
-    private totalWaves: number = 15; // Example total number of waves
+    private totalWaves: number = 30; // Example total number of waves
     public currentWave: number = 1; // Track the current wave
     private currentWaveEnemies: Enemy[] = []; // Track enemies of the current wave.
     private waveStarted: boolean = false;

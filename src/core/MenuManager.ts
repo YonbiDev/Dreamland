@@ -523,7 +523,7 @@ export class MenuManager {
                 name: "Big King",
                 img: "assets/enemies/bigking.png",
                 desc: "Le boss final, un fantôme colossal et extrêmement résistant.",
-                health: 1000,
+                health: 400,
                 speed: 6,
                 icon: "🦁"
             }
@@ -547,7 +547,6 @@ export class MenuManager {
         grid.style.justifyItems = "center";
         grid.style.alignItems = "center";
         grid.style.width = "100%";
-        grid.style.maxWidth = "492.8px"; // 448px * 1.1
         enemyList.appendChild(grid);
 
         // Couleurs de bordure pour chaque ennemi (palette douce)
@@ -564,23 +563,24 @@ export class MenuManager {
 
         enemies.forEach((enemy, idx) => {
             const card = document.createElement("div");
+            // --- UI ENEMY CARD SCALED +20% ---
             card.style.position = "relative";
-            card.style.padding = "12.65px 8.47px 11.22px 8.47px"; // 11.5px 7.7px 10.2px 7.7px * 1.1
-            card.style.width = "118.25px"; // 107.5px * 1.1
-            card.style.height = "169px"; // 153.6px * 1.1
-            card.style.maxWidth = "118.25px";
-            card.style.borderRadius = "12.65px"; // 11.5px * 1.1
+            card.style.padding = "15.18px 10.16px 13.46px 10.16px"; // 12.65px 8.47px 11.22px 8.47px * 1.2
+            card.style.width = "141.9px"; // 118.25px * 1.2
+            card.style.height = "202.8px"; // 169px * 1.2
+            card.style.maxWidth = "141.9px";
+            card.style.borderRadius = "15.18px"; // 12.65px * 1.2
             card.style.background = "linear-gradient(135deg, #1e2838 0%, #2c3e50 100%)";
-            card.style.boxShadow = "0 2.816px 12.672px 0 rgba(0,0,0,0.32)"; // 2.56px 11.52px * 1.1
-            card.style.border = `1.76px solid ${borderColors[idx % borderColors.length]}`; // 1.6px * 1.1
+            card.style.boxShadow = "0 3.379px 15.206px 0 rgba(0,0,0,0.32)"; // 2.816px 12.672px * 1.2
+            card.style.border = `2.112px solid ${borderColors[idx % borderColors.length]}`; // 1.76px * 1.2
             card.style.display = "flex";
             card.style.flexDirection = "column";
             card.style.alignItems = "center";
             card.style.justifyContent = "flex-start";
-            card.style.transition = "transform 0.22s cubic-bezier(.77,0,.18,1), box-shadow 0.22s, border-color 0.22s";
+            card.style.transition = "transform 0.264s cubic-bezier(.77,0,.18,1), box-shadow 0.264s, border-color 0.264s"; // 0.22s * 1.2
             card.style.cursor = "pointer";
             card.style.opacity = "0";
-            card.style.transform = "scale(0.92) translateY(20.9px)"; // 19px * 1.1
+            card.style.transform = "scale(0.92) translateY(25.08px)"; // 20.9px * 1.2
             card.style.overflow = "hidden";
             setTimeout(() => {
                 card.style.opacity = "1";
@@ -588,45 +588,45 @@ export class MenuManager {
             }, 100 + idx * 80);
 
             card.onmouseover = () => {
-                card.style.transform = "scale(1.08) translateY(-2.86px)"; // 2.6px * 1.1
-                card.style.boxShadow = `0 5.632px 22.528px 0 ${borderColors[idx % borderColors.length]}88`;
+                card.style.transform = "scale(1.08) translateY(-3.432px)"; // 2.86px * 1.2
+                card.style.boxShadow = `0 6.758px 27.034px 0 ${borderColors[idx % borderColors.length]}88`; // 5.632px 22.528px * 1.2
                 card.style.borderColor = "#fff";
             };
             card.onmouseout = () => {
                 card.style.transform = "scale(1) translateY(0)";
-                card.style.boxShadow = "0 2.816px 12.672px 0 rgba(0,0,0,0.32)";
+                card.style.boxShadow = "0 3.379px 15.206px 0 rgba(0,0,0,0.32)";
                 card.style.borderColor = borderColors[idx % borderColors.length];
             };
 
             // Icon in a colored circle
             const iconCircle = document.createElement("div");
-            iconCircle.style.width = "33.77px"; // 30.7px * 1.1
-            iconCircle.style.height = "33.77px";
+            iconCircle.style.width = "40.524px"; // 33.77px * 1.2
+            iconCircle.style.height = "40.524px";
             iconCircle.style.borderRadius = "50%";
             iconCircle.style.background = `${borderColors[idx % borderColors.length]}22`;
             iconCircle.style.display = "flex";
             iconCircle.style.alignItems = "center";
             iconCircle.style.justifyContent = "center";
-            iconCircle.style.marginBottom = "4.18px"; // 3.8px * 1.1
-            iconCircle.style.boxShadow = `0 1.408px 5.632px ${borderColors[idx % borderColors.length]}55`;
-            iconCircle.style.fontSize = "18.26px"; // 16.6px * 1.1
+            iconCircle.style.marginBottom = "5.016px"; // 4.18px * 1.2
+            iconCircle.style.boxShadow = `0 1.689px 6.758px ${borderColors[idx % borderColors.length]}55`; // 1.408px 5.632px * 1.2
+            iconCircle.style.fontSize = "21.912px"; // 18.26px * 1.2
             iconCircle.innerText = enemy.icon;
             card.appendChild(iconCircle);
 
             // Enemy image in a circle
             const imgCircle = document.createElement("div");
-            imgCircle.style.width = "43.67px"; // 39.7px * 1.1
-            imgCircle.style.height = "43.67px";
+            imgCircle.style.width = "52.404px"; // 43.67px * 1.2
+            imgCircle.style.height = "52.404px";
             imgCircle.style.borderRadius = "50%";
             imgCircle.style.background = "#222c3a";
             imgCircle.style.display = "flex";
             imgCircle.style.alignItems = "center";
             imgCircle.style.justifyContent = "center";
-            imgCircle.style.marginBottom = "5.61px"; // 5.1px * 1.1
-            imgCircle.style.boxShadow = "0 0.704px 5.632px #005bea33";
+            imgCircle.style.marginBottom = "6.732px"; // 5.61px * 1.2
+            imgCircle.style.boxShadow = "0 0.845px 6.758px #005bea33"; // 0.704px 5.632px * 1.2
             const img = document.createElement("img");
-            img.style.width = "31.02px"; // 28.2px * 1.1
-            img.style.height = "31.02px";
+            img.style.width = "37.224px"; // 31.02px * 1.2
+            img.style.height = "37.224px";
             img.style.objectFit = "contain";
             img.style.borderRadius = "50%";
             img.src = enemy.img;
@@ -636,11 +636,11 @@ export class MenuManager {
 
             // Name
             const name = document.createElement("div");
-            name.style.fontSize = "10.56px"; // 9.6px * 1.1
+            name.style.fontSize = "12.672px"; // 10.56px * 1.2
             name.style.color = "#fff";
             name.style.fontWeight = "bold";
-            name.style.marginBottom = "2.86px"; // 2.6px * 1.1
-            name.style.letterSpacing = "0.495px"; // 0.45px * 1.1
+            name.style.marginBottom = "3.432px"; // 2.86px * 1.2
+            name.style.letterSpacing = "0.594px"; // 0.495px * 1.2
             name.style.textAlign = "center";
             name.innerText = enemy.name;
             card.appendChild(name);
@@ -650,34 +650,34 @@ export class MenuManager {
             stats.style.display = "flex";
             stats.style.justifyContent = "center";
             stats.style.alignItems = "center";
-            stats.style.gap = "7.04px"; // 6.4px * 1.1
-            stats.style.marginBottom = "2.86px"; // 2.6px * 1.1
+            stats.style.gap = "8.448px"; // 7.04px * 1.2
+            stats.style.marginBottom = "3.432px"; // 2.86px * 1.2
             stats.innerHTML = `
-                <span title="Vie" style="color:#ff5252;font-size:10.56px;vertical-align:middle;">❤️</span>
-                <span style="color:#fff;font-size:9.13px;font-weight:bold;">${enemy.health}</span>
-                <span title="Vitesse" style="color:#00e6e6;font-size:10.56px;vertical-align:middle;margin-left:4.18px;">⚡</span>
-                <span style="color:#fff;font-size:9.13px;font-weight:bold;">${enemy.speed}</span>
+                <span title="Vie" style="color:#ff5252;font-size:12.672px;vertical-align:middle;">❤️</span>
+                <span style="color:#fff;font-size:10.956px;font-weight:bold;">${enemy.health}</span>
+                <span title="Vitesse" style="color:#00e6e6;font-size:12.672px;vertical-align:middle;margin-left:5.016px;">⚡</span>
+                <span style="color:#fff;font-size:10.956px;font-weight:bold;">${enemy.speed}</span>
             `;
             card.appendChild(stats);
 
             // Separator
             const sep = document.createElement("div");
             sep.style.width = "60%";
-            sep.style.height = "1.1px"; // 1px * 1.1
+            sep.style.height = "1.32px"; // 1.1px * 1.2
             sep.style.background = "#b2bec355";
-            sep.style.margin = "2.86px 0 4.18px 0"; // 2.6px 0 3.8px 0 * 1.1
+            sep.style.margin = "3.432px 0 5.016px 0"; // 2.86px 0 4.18px 0 * 1.2
             card.appendChild(sep);
 
             // Description
             const desc = document.createElement("div");
-            desc.style.fontSize = "7.7px"; // 7px * 1.1
+            desc.style.fontSize = "9.24px"; // 7.7px * 1.2
             desc.style.color = "#b2bec3";
             desc.style.textAlign = "center";
             desc.style.lineHeight = "1.3";
-            desc.style.marginBottom = "1.43px"; // 1.3px * 1.1
+            desc.style.marginBottom = "1.716px"; // 1.43px * 1.2
             desc.style.wordBreak = "break-word";
             desc.style.overflowWrap = "break-word";
-            desc.style.maxWidth = "104.17px"; // 94.7px * 1.1
+            desc.style.maxWidth = "125.004px"; // 104.17px * 1.2
             desc.innerText = enemy.desc;
             card.appendChild(desc);
 

@@ -36,6 +36,7 @@ export class Game {
     }
 
     constructor() {
+        showLoadingScreen(); // <-- Affiche le loading dès le début
         this.canvas = document.getElementById("renderCanvas") as HTMLCanvasElement;
         this.engine = new BABYLON.Engine(this.canvas, true);
         this.scene = initializeScene(this.engine);
@@ -104,6 +105,9 @@ export class Game {
         waveManager.initWave("level1_spawnpoint1"); // Example wave start
        // UIManager.getInstance().showPreparationPhaseAnimation();
 
+        // À la toute fin, quand tout est prêt :
+        hideLoadingScreen(); // <-- Cache le loading quand le jeu est prêt
+
         this.engine.runRenderLoop(() => {
             const deltaTime = this.engine.getDeltaTime() / 1000; // Convertir en secondes
 
@@ -157,6 +161,38 @@ export function deleteEnemey(enemy: Enemy): void {
         console.log("📌 Enemy removed. Remaining enemies:", enemies.length);
     }
 
+}
+
+// --- Loading screen helpers ---
+function showLoadingScreen() {
+    if (document.getElementById("game-loading-overlay")) return;
+    const overlay = document.createElement("div");
+    overlay.id = "game-loading-overlay";
+    overlay.style.position = "fixed";
+    overlay.style.top = "0";
+    overlay.style.left = "0";
+    overlay.style.width = "100vw";
+    overlay.style.height = "100vh";
+    overlay.style.background = "rgba(10,20,40,0.88)";
+    overlay.style.display = "flex";
+    overlay.style.flexDirection = "column";
+    overlay.style.justifyContent = "center";
+    overlay.style.alignItems = "center";
+    overlay.style.zIndex = "999999";
+    overlay.innerHTML = `
+        <div style="font-size:2.2rem;color:#FFD700;font-weight:bold;margin-bottom:24px;letter-spacing:1.5px;text-shadow:0 0 24px #232526;">
+            Chargement du rêve...
+        </div>
+        <div style="width:64px;height:64px;border:7px solid #00ffd0;border-top:7px solid #232526;border-radius:50%;animation:spin 1s linear infinite;"></div>
+        <style>
+        @keyframes spin { 0%{transform:rotate(0deg);} 100%{transform:rotate(360deg);} }
+        </style>
+    `;
+    document.body.appendChild(overlay);
+}
+function hideLoadingScreen() {
+    const overlay = document.getElementById("game-loading-overlay");
+    if (overlay) overlay.remove();
 }
 
 
